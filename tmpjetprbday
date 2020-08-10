@@ -1,0 +1,490 @@
+ProblemOfTheDay-Aug01
+Integer types and operations  Reading integer numbers
+Write a program that reads four integer numbers from one line and prints them each in a new line. In the input line numbers are separated by one or more spaces.
+
+Sample Input 1:
+
+101    102 103  104
+Sample Output 1:
+
+101
+102
+103
+104
+ Write a program
+ 
+import java.util.Scanner;
+class Main {
+    public static void main(String[] args) {
+        // put your code here
+        Scanner scanner = new Scanner(System.in);
+        int num1 = scanner.nextInt();
+        int num2 = scanner.nextInt();
+        int num3 = scanner.nextInt();
+        int num4 = scanner.nextInt();
+        System.out.println(num1);
+        System.out.println(num2);
+        System.out.println(num3);
+        System.out.println(num4);
+    }
+}
+
+ALternate Ans:
+import java.util.Scanner;
+
+class Main {
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+    
+        System.out.println(scanner.nextInt());
+        System.out.println(scanner.nextInt());
+        System.out.println(scanner.nextInt());
+        System.out.println(scanner.nextInt());
+    }
+}
+
+import java.util.Scanner;
+
+class Main {
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        while (scanner.hasNext()) {
+            System.out.println(scanner.nextInt());
+        }
+    }
+}
+
+import java.util.Scanner;
+
+class Main {
+    public static void main(String[] args) {
+        final Scanner scanner = new Scanner(System.in);
+        System.out.printf("%d%n%d%n%d%n%d%n",
+                scanner.nextInt(), scanner.nextInt(), scanner.nextInt(), scanner.nextInt());
+    }
+}
+
+
+import java.util.Arrays;
+import java.util.Scanner;
+
+class Main {
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        int[] nums = Arrays.stream(scanner.nextLine().split("\\s+")).mapToInt(Integer::parseInt).toArray();
+        Arrays.stream(nums).forEach(System.out::println);
+    }
+}
+
+
+===================================
+ProblemOfTheDay-Jul31
+The while and do-while loops  The largest element of a sequence
+Given the sequence of integer numbers (which ends with the number 0). Find the largest element of the sequence.
+
+The number 0 itself is not included in the sequence but serves only as a sign of the sequence’s end.
+
+Sample Input 1:
+
+1
+7
+9
+0
+Sample Output 1:
+
+9
+ Write a program
+ 
+Ans:
+import java.util.Scanner;
+
+class Main {
+    public static void main(String[] args) {
+        // put your code here
+        Scanner scanner = new Scanner(System.in);
+        int num = -1;
+        while (true) {
+            int inp = scanner.nextInt();
+            if (inp == 0) {
+                break;
+            } else if (inp > num) {
+                num = inp;
+            }
+        }
+        System.out.println(num);
+    }
+}
+
+
+Alternate Ans:
+import java.util.Scanner;
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        
+        int number = scanner.nextInt();
+        int max = number;
+
+        while (number != 0) {
+            if (max < number) {
+                max = number;
+            }
+            number = scanner.nextInt();
+        }
+
+        System.out.println(max);
+    }
+}
+
+import java.util.Scanner;
+ 
+class Main {
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        int a;
+        int n = 0;
+        while ((a = scanner.nextInt()) != 0) {
+            n = a > n ? a : n;
+        }
+        System.out.println(n);
+
+    }
+}
+
+import java.util.Scanner;
+
+class Main {
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        int maxNum = scanner.nextInt();
+        int currentNum;
+        do {
+            currentNum = scanner.nextInt();
+            if (currentNum > maxNum) {
+                maxNum = currentNum;
+            }
+        } while (currentNum != 0);
+        System.out.println(maxNum);
+    }
+} 
+
+===================================
+ProblemOfTheDay-Jul30
+Access modifiers  Select correct lines
+You are given two classes:
+
+org.demo.A
+org.demo.B
+class A {
+    
+    private A() { }
+    
+    void invokeB() { 
+        B objB = new B(); // (1)
+        int b = objB.b;   // (2)
+        int c = objB.c;   // (3)
+    }
+}
+ 
+class B {
+ 
+    protected int b;
+    private int c;
+    
+    public void invokeA() {
+        A objA = new A(); // (4)
+    }
+}
+Select all correct lines.
+
+ Select one or more options from the list
+ 1
+
+2
+===================================
+ProblemOfTheDay-Jul28
+Math library  Quadratic equation
+ou are given real numbers a, b and c, where a ≠ 0.
+
+Solve the quadratic equation ax^2 + bx + c = 0ax 
+2
+ +bx+c=0 and output all of its roots.
+
+It is guaranteed that the equation always has two roots.
+
+Output the results roots in ascending order. Do not round or format them, the testing system does it automatically.
+
+Sample Input 1:
+
+1
+-1
+-2
+Sample Output 1:
+
+-1 2
+Sample Input 2:
+
+1
+-7.5
+3
+Sample Output 2:
+
+0.423966 7.07603
+Sample Input 3:
+
+0.1
+-2
+0.999
+Sample Output 3:
+
+0.51264 19.4874
+Sample Input 4:
+
+-11
+-32
+41
+Sample Output 4:
+
+-3.87177 0.962679
+ Write a program
+
+
+
+
+x = (-b ± sqrt(b^2 - 4ac)) / 2a
+
+Ans:
+import java.util.Scanner;
+
+class Main {
+    public static void main(String[] args) {
+        // put your code here
+        Scanner scanner = new Scanner(System.in);
+        double a = scanner.nextDouble();
+        double b = scanner.nextDouble();
+        double c = scanner.nextDouble();
+        // -b - sqrt(b*b - 4*a*c)/2*a
+        // -b + sqrt(b*b - 4*a*c)/2*a
+        double s = b * b - 4 * a * c;
+        double ss = Math.sqrt(s);
+        double r1 = (-b - ss) / (2 * a);
+        double r2 = (-b + ss) / (2 * a);
+        
+        //if r2 is lower swap
+        double temp = 0;
+        if (r2 < r1) {
+            temp = r1;
+            r1 = r2;
+            r2 = temp;
+        }
+        
+        System.out.println(r1); 
+        System.out.println(r2);
+    }
+}
+
+Alternate Ans:
+import java.util.Scanner;
+
+class Main {
+    public static void main(String[] args) {
+        double a, b, c, x1, x2;
+        Scanner scanner = new Scanner(System.in);
+
+        a = scanner.nextDouble();
+        b = scanner.nextDouble();
+        c = scanner.nextDouble();
+
+        x1 = (-b - Math.sqrt(b * b - 4 * a * c)) / (2 * a);
+        x2 = (-b + Math.sqrt(b * b - 4 * a * c)) / (2 * a);
+
+        System.out.println(Math.min(x1, x2));
+        System.out.println(Math.max(x1, x2));
+    }
+}
+
+
+import java.util.Scanner;
+
+class Main {
+    public static void main(String[] args) {
+        var scanner = new Scanner(System.in);
+        var a = scanner.nextDouble();
+        var b = scanner.nextDouble();
+        var c = scanner.nextDouble();
+        double quadratic1 = (-b + Math.sqrt(Math.pow(b, 2) - 4 * a * c)) / (2 * a);
+        double quadratic2 = (-b - Math.sqrt(Math.pow(b, 2) - 4 * a * c)) / (2 * a);
+        if(quadratic1 > quadratic2){
+            System.out.print(quadratic2 + " ");
+            System.out.println(quadratic1);
+        } else {
+            System.out.print(quadratic1 + " ");
+            System.out.println(quadratic2);
+        }
+    }
+}
+
+===================================
+ProblemOfTheDay-Jul24
+Switch statement  Shape
+Write a program, which reads the number of the shape (1 – square, 2 – circle, 3 – triangle, 4 – rhombus) and prints the text "You have chosen a square" (or circle, or triangle, or rhombus, depending on the number). If it is a number that doesn't correspond to any of the listed shapes, the program should output: "There is no such shape!".
+
+Note: output text should exactly match the sample, including letters' case and location of spaces.
+
+Sample Input 1:
+
+1
+Sample Output 1:
+
+You have chosen a square
+ Write a program
+ 
+Ans:
+
+
+===================================
+ProblemOfTheDay-Jul23
+Processing strings  Cutting out the middle of a string
+Write a program that reads a string, and then outputs the string without its middle character when the length is odd, and without the middle 2 characters when the length is even.
+
+Hint
+
+Remember substring() method. It can help you a lot.
+
+Sample Input 1:
+
+Hello
+Sample Output 1:
+
+Helo
+Sample Input 2:
+
+abcd
+Sample Output 2:
+
+ad
+ Write a program
+ 
+ Ans:
+ import java.util.Scanner;
+
+class Main {
+    public static void main(String[] args) {
+        // put your code here
+        Scanner scanner = new Scanner(System.in);
+        String s = scanner.nextLine();
+        boolean isEven = s.length() % 2 == 0;
+        if (!isEven) {
+            int mid = s.length() / 2;
+            System.out.println(s.substring(0, mid) + s.substring(mid + 1, s.length()));
+        } else {
+            int mid = s.length() / 2;
+            System.out.println(s.substring(0, mid - 1) + s.substring(mid + 1, s.length()));
+        }
+        
+    }
+}
+
+Alternate Ans:
+import java.util.Scanner;
+
+public class Main {
+
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        char[] chars = (sc.nextLine()).toCharArray();
+
+        if (chars.length % 2 == 0) {
+            for (int i = 0; i < chars.length / 2 - 1; i++) {
+                System.out.print(chars[i]);
+            }
+            for (int i = chars.length / 2 + 1; i < chars.length; i++) {
+                System.out.print(chars[i]);
+            }
+        } else {
+            for (int i = 0; i < (chars.length - 1) / 2; i++) {
+                System.out.print(chars[i]);
+            }
+            for (int i = (chars.length - 1) / 2 + 1; i < chars.length; i++) {
+                System.out.print(chars[i]);
+            }
+        }
+    }
+}
+
+
+
+import java.util.Scanner;
+
+class Main {
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        String word = scanner.nextLine().trim();
+        boolean isOdd = word.length() % 2 != 0;
+        int cut = isOdd ? (word.length() - 1) / 2 : (word.length() - 2) / 2;
+
+        System.out.println(word.substring(0, cut) + word.substring(word.length() - cut));
+    }
+}
+
+
+import java.util.Scanner;
+
+class Main {
+
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        String input = scanner.nextLine();
+
+        int half = (input.length() - 1) / 2;
+
+        String left = input.substring(0, half);
+        String right = input.substring(input.length() - half);
+
+        System.out.println(left + right);
+    }
+}
+
+import java.util.Scanner;
+class Main {
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        String word = scanner.nextLine();
+        int index = word.length() / 2;
+        if (word.length() % 2 == 0) {
+            System.out.println(word.substring(0, index - 1) + word.substring(index + 1, word.length()));
+        } else {
+            System.out.println(word.substring(0, index) + word.substring(index + 1, word.length()));
+        }
+    }
+}
+
+
+
+class Main {
+    public static void main(String[] args) {
+        String s = new java.util.Scanner(System.in).nextLine();
+        int i = (s.length() - 1) / 2;
+        System.out.println(s.substring(0, i) + s.substring(s.length() - i));
+    }
+}
+
+===================================
+probOfDay-Jul21
+Problem of the day
+Branching statements  The sequence
+Write a program that prints a part of the sequence 1 2 2 3 3 3 4 4 4 4 5 5 5 5 5 ... (the number is repeated as many times, to what it equals to). The input to the program is a positive integer n: the number of the elements of the sequence the program should print. Output the sequence of numbers, written in a single line, space-separated.
+
+For example, if n = 7, then the program should output 1 2 2 3 3 3 4.
+
+Sample Input 1:
+
+7
+Sample Output 1:
+
+1 2 2 3 3 3 4
+ Write a program
+ 
+ ==================================
+ 
