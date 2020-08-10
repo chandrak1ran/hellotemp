@@ -1,0 +1,5894 @@
+
+=========================================
+FileNotesCreateWriteTheory: Writing files
+Now that we've learned how to create and manage files, let's discuss how to write text to a file. Java provides different ways for doing it and in this lesson, we will consider two of the simplest ways: using the java.io.FileWriter and the java.io.PrintWriter classes. The techniques of the work are absolutely clear.
+
+The FileWriter class
+The class FileWriter has a set of constructors to write characters and string to a specified file:
+
+FileWriter(String fileName);
+FileWriter(String fileName, boolean append);
+FileWriter(File file);
+FileWriter(File file, boolean append);
+
+Two constructors take an additional parameter append that indicates whether to append (true) or overwrite (false) an existing file.
+
+All these constructors can throw an IOException for several reasons:
+
+if the named file exists but it is a directory;
+if a file does not exist and cannot be created;
+if a file exists but cannot be opened.
+
+In this lesson, sometimes we will skip the exception handling mechanism to simplify our examples.
+
+Let's consider the following code:
+
+File file = new File("/home/username/path/to/your/file.txt");
+FileWriter writer = new FileWriter(file); // overwrites the file
+ 
+writer.write("Hello");
+writer.write("Java");
+ 
+writer.close();
+
+If the specified file does not exist, it will be created after executing this code. If the file already exists, this code overwrites the data.
+
+The file will contain the text HelloJava.
+
+If you want to append some new data, you should specify the second argument as true.
+
+File file = new File("/home/username/path/to/your/file.txt");
+FileWriter writer = new FileWriter(file, true); // appends text to the file
+ 
+writer.write("Hello, World\n");
+writer.close();
+
+This code appends a new line to the file. Run it multiple times to see what happens. Note that here we are using Unix-like OS line breakers. There is a difference between line break characters:
+
+\n Unix-like OS
+\r\n Windows OS
+
+Closing a FileWriter
+It is important to close a FileWriter after using to avoid the resource leak. It is done by invoking the close method:
+
+writer.close();
+Since Java 7, the convenient way to close an object of FileWriter is to use the try-with-resources statement.
+
+File file = new File("/home/username/path/to/your/file.txt");
+ 
+try (FileWriter writer = new FileWriter(file)) {
+    writer.write("Hello, World");
+} catch (IOException e) {
+    System.out.printf("An exception occurs %s", e.getMessage());
+}
+
+It will close the writer automatically.
+
+The PrintWriter class
+The PrintWriter class allows you to write formatted data to a file. It can output strings, primitive types and even an array of characters. The class provides several overloaded methods: print, println and printf.
+
+File file = new File("/home/art/Documents/file.txt");
+try (PrintWriter printWriter = new PrintWriter(file)) {
+    printWriter.print("Hello"); // prints a string
+    printWriter.println("Java"); // prints a string and then terminates the line
+    printWriter.println(123); // prints a number
+    printWriter.printf("You have %d %s", 400, "gold coins"); // prints a formatted string
+} catch (IOException e) {
+    System.out.printf("An exception occurs %s", e.getMessage());
+}
+
+This example first creates an instance of File and, second, a PrintWriter in the try-with-resources statement to close it correctly. It writes "Hello"and "Java" in the same line, and then 123 on a new line. This example also call the advanced printf method which can format a text using %d, %s and so on. Finally, the PrintWriter is closed.
+
+The result contains:
+
+HelloJava
+123
+You have 400 gold coins
+
+The class has several constructors. Some of them are similar to FileWriter's constructors:
+
+PrintWriter(String fileName);
+PrintWriter(File file);
+
+Others allow to pass FileWriter as a class that extends Writer abstract class:
+
+PrintWriter(Writer writer);
+
+FileWriter and PrintWriter both extend Writer abstract class and have many similarities. However, PrintWriter is more of a high-level one and provides several useful methods. Among them are formatting methods and overloaded print methods for writing primitive types.
+
+Exercises:
+>>Writing files  FileWriter methods
+What method is used for writing to file by java.io.FileWriter?
+Ans:
+write
+
+>>Writing files  FileWriter output
+1072 users solved this problem. Latest completion was about 3 hours ago.
+Suppose that we have a file file.txt that contains one line:
+
+before latin
+How does the following piece of code change the file's content?
+
+File file = new File("file.txt");
+ 
+try (FileWriter fileWriter = new FileWriter(file)) {
+    fileWriter.write("Lorem ipsum");
+    fileWriter.write(" dolor sit amet");
+}
+Select the correct option with file's content after the method completion:
+
+ Select one option from the list
+ Ans:
+ single line "Lorem ipsum dolor sit amet"
+
+>>Writing files  PrintWriter output
+What does the following piece of code print to file?
+
+File file = new File("file.txt"); // some file
+ 
+try (PrintWriter printWriter = new PrintWriter(file)) {
+    printWriter.printf("%s dolor sit %s", "Lorem", "ipsum", "amet");
+}
+ Enter a short text
+ Ans:
+ Lorem dolor sit ipsum
+ 
+ >>Writing files  What does a file contain
+Here is a method that outputs a range of numbers to a file:
+
+public static void printRangeToFile(String file, boolean append, int fromIncl, int toExcl) {
+    try (FileWriter writer = new FileWriter(file, append)) {
+        for (int i = fromIncl; i < toExcl; i++) {
+            writer.write(i + " ");
+        }
+    } catch (IOException e) {
+        System.out.printf("An exception occurs %s", e.getMessage());
+    }
+}
+We invoke it three times as below:
+
+String filepath = "file.txt"; // relative path to the file
+printRangeToFile(filepath, false, 0, 10);
+printRangeToFile(filepath, true, 10, 20);
+printRangeToFile(filepath, false, 20, 30);
+Which of the following describes the data in this file?
+
+Note: spaces used as separators are not considered as data.
+
+ Select one option from the list
+Ans:
+Numbers from 20 to 29
+>>Writing files  Print to file
+The following piece of code prints to file the line: Lorem ipsum
+
+File file = new File("file.txt"); // some file
+ 
+try (FileWriter writer = new FileWriter(file, true)) {
+    writer.write("Lorem ipsum");
+}
+Before the method invocation our file contained a single line without trailing spaces: before latin
+
+Type the line that represents the file's content after the method completion:
+Ans:
+before latinLorem ipsum 
+
+======================================================================================
+Encryption Files
+What you'll do in this stage 5/6: X-files
+At this stage, you need to add the ability to read and write original and cipher data to files. The program must parse two additional arguments -in and -out to specify the full name of a file to read data and to write the result. Arguments -mode, -key, and -data should still work as before.
+
+Your program should read data from -data or from a file written in the -in argument. That's why you can't have both -data and -in arguments simultaneously, only one of them.
+
+If there is no -mode, the program should work in enc mode.
+If there is no -key, the program should consider that key = 0.
+If there is no -data, and there is no -in the program should assume that the data is an empty string.
+If there is no -out argument, the program must print data to the standard output.
+If there are both -data and -in arguments, your program should prefer -data over -in.
+If there is a non-standard situation (an input file does not exist or an argument doesn’t have a value), the program should not fail. Instead, it must display a clear message about the problem and stop successfully. The message should contain the word "Error" in any case.
+======================================================================================
+Encryption Project Level 2
+Encryption project 2:
+>>Work on project. Stage 2/6: Knowledge is key
+
+Description
+Write a program that reads an English message and an integer number (key) from the standard input and shifts each letter by the specified number according to its order in the alphabet. If you reach the end of the alphabet, start back at the beginning (a follows z).
+
+The English alphabet is below:
+
+abcdefghijklmnopqrstuvwxyz
+The program should not modify non-letter characters.
+
+The key is assumed to mean that if a person knows the value of the key, he or she will be able to decrypt the text, and if he or she does not know, he or she will not be able to decrypt the text. It's like a real key that can open up access to the message text.
+
+Note, key is just a special parameter that controls the behavior of our encryption algorithm. See the picture below for more information.
+
+
+The encryption process
+
+Input example
+welcome to hyperskill
+5
+Output example
+bjqhtrj yt mdujwxpnqq
+
+package encryptdecrypt;
+import java.util.Scanner;
+
+public class Main {
+    public static void main(String[] args) {
+        //System.out.println("Hello World!");
+        //String in = "we found a treasure!";
+        Scanner scanner = new Scanner(System.in);
+        String in = scanner.nextLine();
+        int numToMove = scanner.nextInt();
+        char[] inChars = in.toCharArray();
+        char[] newChars = new char[inChars.length];
+        for (int i = 0; i < inChars.length; i++) {
+            int asciiC = (int)inChars[i];
+            int newAscii = asciiC;
+            //int newAscii = asciiC >= 97 && asciiC <= 122 ? 122 - asciiC - numToMove + 97 : asciiC;
+            boolean isAlpha = asciiC >= 97 && asciiC <= 122 ? true : false;
+            if (isAlpha) {
+                newAscii = asciiC + numToMove;
+                if (newAscii > 122) {
+                    int diff = newAscii - 122;
+                    newAscii = 97 + diff-1;
+                }
+            } 
+            newChars[i] = (char)newAscii;
+        }
+        
+        for (Character c : newChars) {
+            System.out.print(c);
+        }
+        
+    }
+}
+
+
+Alternate Ans:
+package encryptdecrypt;
+
+import java.util.Scanner;
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        char[] chars = scanner.nextLine().toCharArray();
+        int shift = scanner.nextInt();
+
+        char a = 'a';
+        char z = 'z';
+        int size = 26;
+
+        for (char item : chars) {
+            if (item >= a && item <= z) {
+                char shiftItem = (char) (((item - a + shift) % size) + a);
+                System.out.print(shiftItem);
+            } else {
+                System.out.print(item);
+            }
+        }
+    }
+}
+
+This statement:
+char shiftItem = (char) (((item - a + shift) % size) + a);
+only works if (item - 'a' + shift) is positive, since Java's x%y returns a
+value with the same sign as x, i.e. -1 % 26 = -1.  
+If key < 0 then the above code could "shift" a letter to something < 'a'.
+The specification for the problem doesn't guarantee that key >= 0.
+
+
+Also :
+package encryptdecrypt;
+
+import java.util.Scanner;
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        String str = sc.nextLine();
+        int shift = sc.nextInt();
+        String ans = "";
+        int dec = 0;
+        int add = 0;
+        for(int i = 0 ; i < str.length() ; i++){
+            if(Character.isLetter(str.charAt(i))){
+                dec = (int) str.charAt(i);
+                while(shift != add){
+                    if(dec == 122){
+                        dec = 97;
+                    }
+                    else{
+                        dec++;
+                    }
+                    add++;
+                }
+                ans += (char) dec;
+            }
+            else{
+                ans += str.charAt(i);
+            }
+            add = 0;
+        }
+        System.out.println(ans);
+    }
+}
+
+
+package encryptdecrypt;
+
+import java.util.*;
+
+public class Main {
+	public static void main(String[] args) {
+		Scanner scanner = new Scanner(System.in);
+		String[] lettersString = "abcdefghijklmnopqrstuvwxyz".split("");
+		ArrayList<String> letters = convertToList(lettersString);
+		
+		String message = scanner.nextLine();
+		int shift = scanner.nextInt();
+		
+		String secretMessage = encrypt(message, letters, shift);
+		System.out.println(secretMessage);
+	}
+	
+	public static ArrayList<String> convertToList(String[] letters) {
+		ArrayList<String> characters = new ArrayList<>();
+		for (String letter: letters) {
+			characters.add(letter);
+		}
+		return characters;
+	}
+	
+	public static String encrypt(String message, final ArrayList<String> letters, int shift) {
+		shift = shift % letters.size();
+		String secretMessage = "";
+		
+		for (String character: message.split("")) {
+			if (letters.contains(character)) {
+				secretMessage = replaceCharacters(secretMessage, letters, shift, character);
+			} else {
+				secretMessage += character;
+			}
+		}
+		return secretMessage;
+	}
+	
+	public static String replaceCharacters(String secretMessage, final ArrayList<String> letters, int shift, String character) {
+		int lastIndex = letters.size() - 1;
+		int shiftedCharIndex = letters.indexOf(character) + shift;
+		
+		if (shiftedCharIndex <= lastIndex) {
+			secretMessage += letters.get(shiftedCharIndex);
+		} else {
+			int difference = shiftedCharIndex - lastIndex;
+			secretMessage += letters.get(difference - 1);
+		}
+		return secretMessage;
+	}	
+	// if (letters.contains(character)) {
+		//		int charIndex = letters.indexOf(character);
+		//		secretMessage += letters.get(lastIndex - charIndex);
+		//	} else {
+		//		secretMessage += character;
+		//	}
+}
+
+
+package encryptdecrypt;
+import java.util.*;
+public class Main {
+
+    public static StringBuffer encrypt(String str, int shift) {
+        String strlower = str.toLowerCase();
+        StringBuffer sb = new StringBuffer();
+        for (int i = 0; i < strlower.length(); i++) {
+            char ch = (char)(((int)strlower.charAt(i) + shift - 97) % 26 + 97);
+            sb.append(ch);
+        }
+        return sb;
+    }
+    public static void main(String[] args) {
+        Scanner s = new Scanner(System.in);
+        String str = s.nextLine();
+        int shift = s.nextInt();
+        String[] words = str.split(" ");
+        String join = " ";
+        for(String word : words) {
+            join = join + " " + encrypt(word, shift);
+        }
+        System.out.println(join);
+    }
+ }
+
+====================================================================
+Encryption Project
+Encryption:
+>>Work on project. Stage 1/6: Encrypted!
+Motivation
+Today, encryption and decryption algorithms are used everywhere on the Internet to protect our data. This is especially important for sites that handle sensitive data, such as e-commerce sites that accept online card payments and login areas that require users to enter their credentials. To ensure data security, there are complex encryption algorithms behind the scenes.
+
+In this project, you will learn how to encrypt and decrypt messages and texts using simple algorithms. We should note that such algorithms are not suitable for industrial use because they can easily be cracked, but these algorithms demonstrate some general ideas about encryption.
+
+Description
+For the first stage, you need to manually encrypt the message "we found a treasure!" and print only the ciphertext (in lower case).
+To encrypt the message, replace each letter with the letter that is in the corresponding position from the end of the English alphabet (a→z, b→y, c→x, ... x→c, y →b, z→a). Do not replace spaces or the exclamation mark.
+
+Use the given template to your program to print the ciphertext instead of the original message.
+
+The output should look like ## ##### # ########! where # is a lower-case English letter.
+
+ Write a program
+
+
+ANs:
+package encryptdecrypt;
+
+
+public class Main {
+    public static void main(String[] args) {
+        //System.out.println("Hello World!");
+        String in = "we found a treasure!";
+        char[] inChars = in.toCharArray();
+        char[] newChars = new char[inChars.length];
+        for (int i = 0; i < inChars.length; i++) {
+            int asciiC = (int)inChars[i];
+            int newAscii = asciiC >= 97 && asciiC <= 122 ? 122 - asciiC + 97 : asciiC;  //122 - 118 + 97 = 102 - (n-1)
+            newChars[i] = (char)newAscii;
+        }
+        
+        for (Character c : newChars) {
+            System.out.print(c);
+        }
+        
+    }
+}
+
+
+Alternative Ans:
+package encryptdecrypt;
+
+public class Main {
+    public static void main(String[] args) {
+        int max = 122;
+        int min = 97;
+        String toConvert = "we found a treasure!";
+        StringBuilder resultStr = new StringBuilder();
+        for (int i = 0; i < toConvert.length(); i++) {
+            char c = toConvert.charAt(i);
+            if (c == 32 || c == 33) {
+                resultStr.append(c);
+            } else {
+                char result = (char) (max - c + min);
+                resultStr.append(result);
+            }
+        }
+        System.out.println(resultStr);
+    }
+
+}
+
+Alternative Ans:
+package encryptdecrypt;
+
+import java.util.ArrayList;
+
+public class Main {
+    public static void main(String[] args) {
+		String[] lettersString = "abcdefghijklmnopqrstuvwxyz".split("");
+		ArrayList<String> letters = convertToList(lettersString);
+		String message = "we found a treasure!";
+		String secretMessage = encrypt(message, letters);
+		System.out.println(secretMessage);
+	}
+	
+	public static ArrayList<String> convertToList(String[] letters) {
+		ArrayList<String> characters = new ArrayList<>();
+		for (String letter: letters) {
+			characters.add(letter);
+		}
+		return characters;
+	}
+	
+	public static String encrypt(String message, final ArrayList<String> letters) {
+		int lastIndex = letters.size() - 1;
+		String secretMessage = "";
+		for (String character: message.split("")) {
+			if (letters.contains(character)) {
+				int charIndex = letters.indexOf(character);
+				secretMessage += letters.get(lastIndex - charIndex);
+			} else {
+				secretMessage += character;
+			}
+		}
+		return secretMessage;
+	}
+}
+
+
+
+
+===============================================================================
+Sudoku SOlve
+>>Multi-dimensional array  Check sudoku
+
+Wow! This problem is kind of tricky. If you're ready to put your thinking cap on, brace yourself and good luck! Otherwise, you can skip it by now and return any time later
+N-size sudoku is a game with a square table of N2 width and height divided into N2 smaller squares of N width and height. In a solved state, each of these smaller squares, as well as each row and column of a full square, contains all numbers from 1 to N2 without repetition.
+
+Given a number N on the first line and a full sudoku table on the next N2 lines. Every line contains N2 integers.
+
+Your task is to determine whether this sudoku is solved or not. Output "YES" if this sudoku table is solved, otherwise "NO".
+
+N can be from 1 to 10.
+Sample Input 1:
+
+3
+5 8 9 6 7 4 2 1 3
+7 4 3 1 8 2 9 5 6
+1 2 6 9 5 3 8 7 4
+9 3 5 4 2 1 7 6 8
+4 1 2 8 6 7 3 9 5
+6 7 8 3 9 5 1 4 2
+8 6 4 2 1 9 5 3 7
+3 9 7 5 4 8 6 2 1
+2 5 1 7 3 6 4 8 9
+Sample Output 1:
+
+YES
+Sample Input 2:
+
+2
+1 1 2 2
+1 1 2 2
+3 3 4 4
+3 3 4 4
+Sample Output 2:
+
+NO
+Sample Input 3:
+
+1
+1
+Sample Output 3:
+
+YES
+ Write a program
+ 
+ 
+ Ans:
+ import java.util.*;
+
+public class Main {
+    public static void main(String[] args) {
+        // write your code here
+        Scanner scanner = new Scanner(System.in);
+        int sz = scanner.nextInt();
+        String[][] sudoku = new String[sz*sz][sz*sz];
+        scanner.nextLine();//skip the line
+        //horizontal check
+        for (int i = 0; i < sz * sz; i++) {
+            String s = scanner.nextLine();
+            String[] sArr = s.split(" ");
+            boolean check = isCheckWin(sArr, sz * sz);
+            if (!check) {
+                System.out.println("NO");
+                return;
+            }
+            sudoku[i] = sArr;
+        }
+        
+        //vertical check;
+        for (int i = 0; i < sz * sz; i++) {
+            String[] sArr = new String[sz * sz];
+            for (int j = 0 ; j < sz * sz; j++) {
+                sArr[j] = String.valueOf(sudoku[j][i]);
+            }
+            boolean check = isCheckWin(sArr, sz * sz);
+            if (!check) {
+                System.out.println("NO");
+                return;
+            }
+         }
+         
+         //search in boxes-veritically
+         for (int num = 0; num < sz; num++) {
+             String[] sArr = new String[sz*sz];
+             int sCnt = 0;
+             for (int i = 0; i < sz; i++) {
+                 for (int j = 0; j < sz; j++) {
+                     sArr[sCnt] = sudoku[num*sz+i][j];
+                     sCnt++;
+                 }
+             }
+             if (!isCheckWin(sArr, sz*sz)) {
+                  System.out.println("NO");
+                  return;
+             }
+         }
+         
+          //search in boxes-horizontally
+         for (int num = 0; num < sz; num++) {
+             String[] sArr = new String[sz*sz];
+             int sCnt = 0;
+             for (int i = 0; i < sz; i++) {
+                 for (int j = 0; j < sz; j++) {
+                     sArr[sCnt] = sudoku[i][num*sz+j];
+                     sCnt++;
+                 }
+             }
+             if (!isCheckWin(sArr, sz*sz)) {
+                  System.out.println("NO");
+                  return;
+             }
+         }
+         
+         System.out.println("YES");
+        
+    }
+    
+    public static boolean isCheckWin(String[] s, int max) {
+        for (int i = 1; i <= max; i++) {
+            boolean found = false;
+            for (String eS : s) {
+                int elem = Integer.parseInt(eS);
+                if (i == elem) {
+                    found = true;
+                }
+            }
+            if (!found) {
+                return false;
+            } 
+        }
+        
+        return true;
+        
+    }
+}
+
+ 
+ 
+ 
+ 
+ 
+ 
+ Alternative Ans:
+ import java.util.*;
+
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+
+        int n = scanner.nextInt();
+        int maxNum = n * n;
+
+        int[][] table = new int[maxNum][maxNum];
+        boolean solved = true;
+
+        for (int row = 0; row < maxNum; row++) {
+            for (int col = 0; col < maxNum; col++) {
+                table[row][col] = scanner.nextInt();
+            }
+        }
+
+        for (int row = 0; row < maxNum; row++) {
+            for (int col = 0; col < maxNum; col++) {
+                if (table[row][col] <= 0 || table[row][col] > maxNum) {
+                    solved = false;
+                }
+
+                for (int i = 0; i < maxNum; i++) {
+                    if (row != i && table[row][col] == table[i][col]) {
+                        solved = false;
+                    }
+
+                    if (col != i && table[row][col] == table[row][i]) {
+                        solved = false;
+                    }
+                }
+
+                int startRow = row - (row % n);
+                int startCol = col - (col % n);
+
+                for (int r = startRow; r < startRow + n; r++) {
+                    for (int c = startCol; c < startCol + n; c++) {
+                        if ((row != r || col != c) && table[row][col] == table[r][c]) {
+                            solved = false;
+                        }
+                    }
+                }
+            }
+        }
+        
+        System.out.println(solved ? "YES" : "NO");
+    }
+}
+
+One more:
+
+
+import java.util.Scanner;
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        int n = scanner.nextInt(); // initial number
+        int n2 = n * n; // sudoku size
+        int[][] array = new int[n2][n2];
+        boolean solved = true;
+        int[] newArray = new int[n2];
+
+        //creating a sudoku
+        for (int i = 0; i < n2; i++) {
+            for (int j = 0; j < n2; j++) {
+                array[i][j] = scanner.nextInt();
+            }
+        }
+        //checking the condition - number from 1 to n2
+        for (int i = 0; i < n2; i++) {
+            for (int j = 0; j < n2; j++) {
+                if (array[i][j] <= 0 || array[i][j] > n2) {
+                    solved = false;
+                }
+            }
+        }
+        //horizontal check
+        for (int i = 0; i < n2; i++) {
+            for (int j = 0; j < n2; j++) {
+                for (int h = j + 1; h <= n2 - 1; h++) {
+                    if (array[i][j] == array[i][h]) {
+                        solved = false;
+                    }
+                }
+                //vertical check
+                for (int v = j + 1; v <= n2 - 1; v++) {
+                    if (array[j][i] == array[v][i]) {
+                        solved = false;
+                    }
+                }
+            }
+        }
+        // inside check
+        for (int h = 0; h < n2; h += n) {
+            for (int p = 0; p < n2; p += n) {
+                int k = 0;
+                for (int i = h; i < h + n; i++) {
+                    for (int j = p; j < p + n; j++) {
+                        if (k < n2) {
+                            newArray[k] = array[i][j];
+                        } else {
+                            k = 0;
+                        }
+                        k++;
+                    }
+                }
+                for (int i = 0; i < n2; i++) {
+                    for (int j = i + 1; j <= n2 - 1; j++) {
+                        if (newArray[i] == newArray[j]) {
+                            solved = false;
+                        }
+                    }
+                }
+            }
+        }
+        System.out.println(solved ? "YES" : "NO");
+    }
+}
+
+One more short solution:
+import java.util.*;
+
+public class Main {
+    public static void main(String[] args) {
+        // write your code here
+        Scanner scanner = new Scanner(System.in);
+        int number = scanner.nextInt();
+        int numberSquare = number * number;
+        int[][] sudoku = new int[numberSquare][numberSquare];
+        for (int i = 0; i < sudoku.length; i++) {
+            for (int j = 0; j < sudoku[i].length; j++) {
+                sudoku[i][j] = scanner.nextInt();
+            }
+        }
+        System.out.println(isValid(sudoku, number));
+
+    }
+    public static String isValid(int[][] sudoku, int number) {
+
+        if (number == 1) {
+            if (sudoku[0][0] == 1) {
+                return "YES";
+            } else {
+                return "NO";
+            }
+        }
+        HashSet<String> hash = new HashSet();
+        for (int i = 0; i < sudoku.length; i++) {
+            for (int j = 0; j < sudoku[i].length; j++) {
+
+                if (!hash.add(sudoku[i][j] + " found in row " + i)
+                    || !hash.add(sudoku[i][j] + " found in col " + j)
+                    || !hash.add(sudoku[i][j] + " found in the section " + i / number + " " + j / number)) {
+
+                    return "NO";
+                }
+
+
+            }
+        }
+        return "YES";
+    }
+}
+
+
+One more:
+import java.util.*;
+class Main {
+    public static void main(String[] args) {
+        Scanner s = new Scanner(System.in);
+        final int n = s.nextInt();
+        final int n2 = n * n;
+        final boolean[][][] flags = new boolean[3][n2][n2];
+        boolean isSudoku = true;
+
+        for (int i = 0; isSudoku && i < n2; i++) {
+            for (int j = 0; j < n2; j++) {
+                // num at row i col j
+                int num = s.nextInt() - 1;
+                // check that num is in range
+                if (num < 0 || num >= n2) {
+                    isSudoku = false;
+                    break;
+                }
+                int quadrant = (i / n) * n + j / n;
+                // row, col, quadrant check
+                if (flags[0][i][num] || flags[1][j][num] || flags[2][quadrant][num]) {
+                    isSudoku = false;
+                    break;
+                } else {
+                    flags[0][i][num] = true;
+                    flags[1][j][num] = true;
+                    flags[2][quadrant][num] = true;
+                }
+            }
+        }
+        System.out.println(isSudoku ? "YES" : "NO");
+    }
+}
+
+=========================================================================
+String Builder Imp
+StringBuilder IMP
+
+Does anyone know what is in test #5? it keeps telling me failed test #5 of 5.
+1
+Reply
+MM
+Marcin Mierzejewski
+21 days ago
+Report
+Removing a character also shortens the length of a string. When there are 2 or more digits in a row, removing a digit makes your next character occupy the same index that the removed digit did. So when removing a digit, you shouldn't increment the iterator of a loop (assuming you iterate through characters of a string), because it causes your program to skip over the next character, which may be a digit as well.
+
+=============================================================================
+Mathlib
+Theory: Math library
+For efficient performing of various basic (and not so basic) numeric operations including exponential, modulus or finding the max/min of two numbers, Java provides the standard class Math. Let's consider some of the most common methods of this class.
+
+Rounding methods
+There's a number of popular methods for rounding the numbers up, down or the other way:
+
+Math.min(..., ...) returns the smaller value of two arguments;
+Math.max(..., ...) returns the greater value of two arguments;
+int min = Math.min(11, 81); // min is 11
+int max = Math.max(20, 30); // max is 30
+
+Math.abs(...) returns the absolute value of its argument;
+int abs = Math.abs(-10); // abs is 10
+double dabs = Math.abs(-10.33); // dabs is 10.33
+
+Math.floor(...) returns the largest double value that is less than or equal to its argument and is equal to an integer;
+
+Math.ceil(...) returns the smallest double value that is greater than or equal to its argument and is equal to an integer.
+double floor = Math.floor(3.78); // floor is 3.0
+double ceil = Math.ceil(4.15); // ceil is 5.0
+
+Exponential functions
+When we need to calculate a square or a cube root of the given number, we can apply to the following methods:
+
+Math.sqrt(...) returns the square root of its argument;
+Math.cbrt(...) returns the cube root of its argument;
+double sqrt = Math.sqrt(2); // sqrt is 1.4142...
+double cbrt = Math.cbrt(27.0); // cbrt is 3.0
+
+It is also possible to raise the number to any power we would like:
+
+Math.pow(..., ...) returns the value of the first argument raised to the power of the second argument.
+double square = Math.pow(5, 2); // the square of 5 is 25.0
+double cube = Math.pow(2, 3); // the cube of 2 is 8.0
+
+Trigonometric functions
+And here are some of the trigonometric functions, provided in Math:
+
+Math.sin(...) returns the trigonometric sin of the given angle in radians;
+Math.cos(...) returns the trigonometric cos of the given angle in radians;
+double sin = Math.sin(pi / 2); // sin90°  is 1.0
+double cos = Math.cos(pi); // cos180° is -1.0
+
+Math.toRadians(...) converts an angle measured in degrees to an angle measured in radians (approximately).
+double grad = Math.toRadians(30); // grad is 0.5235...
+
+And there's more...
+https://docs.oracle.com/javase/8/docs/api/java/lang/Math.html
+There are also methods for hyperbolic, logarithmic, angular, and other functions. Check them out here and use when needed. Among them, you'll find such a useful method as:
+
+Math.random() returns a double value with a positive sign, greater than or equal to 0.0 and less than 1.0.
+double random = Math.random(); // a random value >= 0.0 and < 1.0
+
+Apart from functions, the Math class in Java contains two common constants:
+
+Math.PI is the ratio of the circumference of a circle to its diameter;
+Math.E is the base of the natural logarithm.
+double pi = Math.PI; // pi is 3.1415...
+double e = Math.E; // e is 2.71828...
+
+The length of the hypotenuse
+Now let's take a look at the example. Assume that we have a right triangle (one angle is 90 degrees). We know the lengths of both sides: a = 3 and b = 4. Our task is to calculate the length of the hypotenuse. Now, it is time to go through the list of the Math class functions. After finding the one we need, the only thing left is to write the following code:
+
+double a = 3, b = 4;
+double c = Math.hypot(a, b); // c is 5.0
+
+As you can see, the Math class has a lot of methods for performing numeric calculations and using them will make your life easier and your code nicer.
+
+
+>>Math library  Method from java.lang.Math class and their results
+Match each method from the java.lang.Math class with its function.
+
+ Match the items from left and right columns
+ 
+Ans: 
+Math.sqrt(x)
+Math.cbrt(x)
+Math.abs(x)
+Math.log(x)
+Math.log10(x)
+Math.max(x, y)
+Math.min(x, y)
+Math.pow(x, y)
+returns the square root of value x
+returns the cube root of value x
+returns the absolute value of x
+returns natural logarithm (base e) of x
+returns the base 10 logarithm of x
+returns the greater value of x and y
+returns the smaller value of x and y
+returns the value of x raised to the power of y.
+
+>>Math library  What is true
+Here are some methods from the Math library called.
+
+Take a look at these statements and select all that are true.
+Ans:
+Math.PI > 3.14 && Math.PI < 3.15
+
+Math.ceil(1.45) > Math.floor(1.55)
+
+>>Math library  Pow
+You are given two floating-point numbers: a and b.
+
+Calculate and output the value of the expression a^ba 
+b
+ .
+
+Note: use double variables for a and b.
+
+Input data format:
+
+Two floating-point numbers in one line.
+
+Output data format:
+
+The result of the expression.
+
+Sample Input 1:
+
+2 3
+Sample Output 1:
+
+8.0
+Sample Input 2:
+
+2 1.02
+Sample Output 2:
+
+2.027918959580058
+
+Ans:
+import java.util.Scanner;
+
+class Main {
+    public static void main(String[] args) {
+        // put your code here
+        Scanner scanner = new Scanner(System.in);
+        double a = scanner.nextDouble();
+        double b = scanner.nextDouble();
+        double res = Math.pow(a, b);
+        System.out.print(res);
+    }
+}
+
+
+>>Math library  Heron's formula
+
+Many years ago when Paul went to school, he did not like the Heron's formula to calculate the area of a triangle, because he considered it very complex. Once he decided to help all school students: to write and distribute the program, calculating the area of a triangle by its three sides.
+
+However, there was a problem: as Paul did not like the formula, he did not memorize it. Help him finish this act of kindness and write the program, calculating the area of a triangle by the transferred length of its sides, in accordance with the Heron's formula:
+
+S=\sqrt{p(p−a)(p−b)(p−c)}
+S= 
+p(p−a)(p−b)(p−c)
+​	
+ 
+where p=\dfrac{a+b+c}2p= 
+2
+a+b+c
+​	
+  – half-perimeter of the triangle. On the input, the program has integers, and the output should be a real number corresponding to the area of the triangle.
+Sample Input 1:
+
+3
+4
+5
+Sample Output 1:
+
+6.0
+ Write a program
+ 
+import java.util.Scanner;
+
+class Main {
+    public static void main(String[] args) {
+        // put your code here
+        Scanner scanner = new Scanner(System.in);
+        double a = scanner.nextDouble();
+        double b = scanner.nextDouble();
+        double c = scanner.nextDouble();
+        
+        double p = (a + b + c) / 2; //halfPerimeter
+        
+        double area = Math.sqrt(p * (p - a) * (p - b) * (p - c));
+        
+        System.out.print(area);
+        
+        
+        
+    }
+}
+
+>>Math library  The angle between vectors
+You are given two 2D vectors. Find the angle (in degrees) between them.
+
+If you don't know how to find the angle, see here: http://www.wikihow.com/Find-the-Angle-Between-Two-Vectors.
+
+Input data format
+
+The first line contains two components of the first vector; the second line contains two components of the second vector. Components in one line are separated by space.
+
+Output data format
+
+One double value: an angle between two vectors. The result can have an error of less than 1e-8.
+
+cosine-1 (u1v1 + u2v2 / (sqrt(u1*u1 + u2*u2)*sqrt(v1*v1 + v2*v2))
+
+
+import java.util.Scanner;
+class Main {
+    public static void main(String[] args) {
+        // put your code here
+        Scanner scanner = new Scanner(System.in);
+        double u1 = scanner.nextDouble();
+        double u2 = scanner.nextDouble();
+        
+        double v1 = scanner.nextDouble();
+        double v2 = scanner.nextDouble();
+        
+        double numerator = u1 * v1 + u2 * v2;
+        double denominator = Math.sqrt(u1 * u1 + u2 * u2) * Math.sqrt(v1 * v1 + v2 * v2);
+        double res = Math.toDegrees(Math.acos(numerator / denominator));
+        System.out.print(res);
+    }
+}
+
+
+Daily Problem:
+Iterating over arrays  Check if an array contains two numbers
+Write a program that reads an unsorted array of integers and two numbers n and m. The program must check if n and m occur next to each other in the array (in any order).
+Input data format
+
+The first line contains the size of an array.
+The second line contains elements of the array.
+The third line contains two integer numbers n and m.
+All numbers in the same line are separated by the space character.
+
+Output data format
+
+Only a single value: true or false.
+
+Sample Input 1:
+
+3
+1 3 2
+2 3
+Sample Output 1:
+
+true
+Sample Input 2:
+
+3
+1 2 3
+3 4
+Sample Output 2:
+
+false
+
+===============================================================================
+ProjectTextRead
+>>Work on project. Stage 3/4: Score!
+Description
+In this stage, you will program the Automated readability index. It was introduced in 1968 and a lot of research works rely on this.The index is calculated by the following formula:
+
+score = 4.71 \times \dfrac{characters}{words} + 0.5 \times \dfrac{words}{sentences} - 21.43score=4.71× 
+words
+characters
+​	
+ +0.5× 
+sentences
+words
+​	
+ −21.43
+ You can look at different ages corresponding to the different scores by the table in this article.
+ 
+ https://en.wikipedia.org/wiki/Automated_readability_index
+
+Also, your program should read a file instead of typing a text manually. You should pass the filename through the command line arguments.
+
+The program should output the score itself and an approximate age needed to comprehend the text.
+
+Use the appropriate rounding function to calculate the score as integer.
+
+You should also print how many characters, words, and sentences the text has.
+
+The number of characters is any visible symbol (so, in the real text it's everything except space, newline "\n" and tab "\t").
+
+Notice, that the text can contain multiple lines, not just a single line like in the previous stages. You should analyze all the lines.
+
+Examples
+The symbol > represents the user input. Notice that it's not the part of the input.
+
+Example 1
+
+> java Main in.txt
+The text is:
+Readability is the ease with which a reader can understand a written text. In natural language, the readability of text depends on its content and its presentation. Researchers have used various factors to measure readability. Readability is more than simply legibility, which is a measure of how easily a reader can distinguish individual letters or characters from each other. Higher readability eases reading effort and speed for any reader, but it is especially important for those who do not have high reading comprehension. In readers with poor reading comprehension, raising the readability level of a text from mediocre to good can make the difference between success and failure
+ 
+Words: 108
+Sentences: 6
+Characters: 580
+The score is: 12.86
+This text should be understood by 18-24 year olds.
+Example 2
+
+> java Main in.txt
+The text is:
+This is the page of the Simple English Wikipedia. A place where people work together to write encyclopedias in different languages. That includes children and adults who are learning English. There are 142,262 articles on the Simple English Wikipedia. All of the pages are free to use. They have all been published under both the Creative Commons License 3 and the GNU Free Documentation License. You can help here! You may change these pages and make new pages. Read the help pages and other good pages to learn how to write pages here. You may ask questions at Simple talk.
+ 
+Words: 100
+Sentences: 10
+Characters: 476
+The score is: 5.98
+This text should be understood by 11-12 year olds.
+ Write a program
+ 
+ 
+ Ans:
+ 
+ package readability;
+import java.util.Scanner;
+import java.io.File;
+import java.io.FileNotFoundException;
+
+public class Main {
+    public static void main(String[] args) {
+        //System.out.print("Hello world!");
+        int numWords = 0;
+        int numSentences = 0;
+        int numChars = 0;
+        double score = 0.0;
+        String ageClass = "";
+        
+        File inFile = new File(args[0]);
+        
+        try (Scanner scanner = new Scanner(inFile)) {
+            String s = "";
+            while (scanner.hasNextLine()) {
+                s += scanner.nextLine();
+            }
+            
+            String tempStr = s.replace("/t","").replace("\n","");
+            numChars = tempStr.replace(" ", "").length();
+            String[] words = tempStr.split(" ");
+            numWords = words.length;
+            
+            //int len = s.length();
+            String delimRegex = "[//.!//?]";
+        
+            String[] sentences = s.split(delimRegex);
+            numSentences = sentences.length;
+        
+            /*int total = 0;
+        
+            for (int i = 0; i < numParas; i++) {
+                String tempPara = sentences[i];
+                String[] tempParaArr = tempPara.split(" ");
+                total += tempParaArr.length;
+            }
+        
+            float avg = total/ numParas;*/
+            score += 4.7 * ((double)numChars / (double)numWords);
+            score += 0.5 * ((double)numWords / (double)numSentences);
+            score -= 21.43;
+            
+            ageClass = classifyScore(score);       
+            /*if (avg > 10) {
+                System.out.print("HARD");
+            } else {
+                System.out.print("EASY");
+            }*/
+            System.out.println("The text is:");
+            System.out.println(s);
+            System.out.println();
+            System.out.println("Words: "+numWords);
+            System.out.println("Sentences: "+numSentences);
+            System.out.println("Characters: "+numChars);
+            System.out.println("The score is: "+score);
+            System.out.println(ageClass);
+            
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+    }
+    
+    public static String classifyScore(double score) {
+        String placeHolder = "";
+        if (score <= 1.0) {
+            placeHolder = "5-6";
+        } else if (score <= 2.0) {
+            placeHolder = "6-7";
+        } else if (score <= 3.0) {
+            placeHolder = "7-9";
+        } else if (score <= 4.0) {
+            placeHolder = "9-10";
+        } else if (score <= 5.0) {
+            placeHolder = "10-11";
+        } else if (score <= 6.0) {
+            placeHolder = "11-12";
+        } else if (score <= 7.0) {
+            placeHolder = "12-13";
+        } else if (score <= 8.0) {
+            placeHolder = "13-14";
+        } else if (score <= 9.0) {
+            placeHolder = "14-15";
+        } else if (score <= 10.0) {
+            placeHolder = "15-16";
+        } else if (score <= 11.0) {
+            placeHolder = "16-17";
+        } else if (score <= 12.0) {
+            placeHolder = "17-18";
+        } else if (score <= 13.0) {
+            placeHolder = "18-24";
+        } else if (score <= 2) {
+            placeHolder = "24+";
+        }
+        
+        return "This text should be understood by "+placeHolder+" year olds.";
+    }
+}
+
+ 
+ Alternate Ans:
+ package readability;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+
+import static java.lang.Math.*;
+
+public class Main {
+    public static void main(String[] args) {
+
+        try {
+            final var text = Files.readString(Path.of(args[0]));
+
+            final var characters = text.replaceAll("\\s", "").length();
+            final var words = text.split(" ").length;
+            final var sentences = text.split("[!?.]+").length;
+            final var score = 4.71 * characters / words + 0.5 * words / sentences - 21.43;
+
+            System.out.printf("The text is:%n%s%n"
+                            + "Words: %d%nSentences: %d%nCharacters: %d%nThe score is: %5.2f%n"
+                            + "This text should be understood by %s year olds.",
+                    text, words, sentences, characters, score, calculateAge(score));
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    static String calculateAge(double score) {
+        final var ageGroups = new String[]{"5-6", "6-7", "7-9", "9-10", "10-11", "11-12",
+                "12-13", "13-14", "14-15", "15-16", "16-17", "17-18", "18-24", "24+"};
+        final int level = min(14, max(1, (int) ceil(score))) - 1;
+        return ageGroups[level];
+    }
+}
+
+package readability;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.util.*;
+
+public class Main {
+    public static void main(String[] args) throws FileNotFoundException {
+        Scanner sc = new Scanner(new File(args[0]));
+        
+        String text = sc.nextLine().trim();
+
+        long sentences = Arrays.stream(text.split("\\. |\\? |! ")).count();
+        long words = Arrays.stream(text.split(" ")).count();
+        long characters = Arrays.stream(text.split("")).filter(a -> a.matches("[^ \t\n]")).count();
+
+        double score = 4.71d * ((double) characters / words) + 0.5d * ((double) words / sentences) - 21.43d;
+
+        System.out.println("Words: " + words + "\n" +
+                "Sentences: " + sentences + "\n" +
+                "Characters: " + characters + "\n" +
+                "The score is: " + Math.round(score * 100) / 100d + "\n" +
+                "This text should be understood by " + age(score) + " year olds.");
+    }
+
+
+    private static String age(double score) {
+
+        int ceil = (int) Math.ceil(score);
+
+        if (ceil >= 4 && ceil <= 12) {
+            return (ceil + 5) + "-" + (ceil + 6);
+        }
+
+        switch (ceil) {
+            case 1: return "5-6";
+            case 2: return "6-7";
+            case 3: return "7-9";
+            case 13: return "18-24";
+            default: return "24+";
+        }
+    }
+}
+
+
+public FileContent(String filename) throws IOException {
+        content = Files.readString(Paths.get(filename)).replaceAll("\\s+", " ");
+    }
+ 
+    public int getWordsCount() {
+        return content.split("\\s").length;
+    }
+ 
+    public int getSentencesCount() {
+        return content.split("[.?!]").length;
+    }
+ 
+    public int getCharsCount() {
+        return content.replaceAll("\\s", "").length();
+    }
+ 
+    public double calculateARI() {
+        double characters = getCharsCount();
+        double words = getWordsCount();
+        double sentences = getSentencesCount();
+ 
+        return (4.71 * (characters / words) + 0.5 * (words / sentences) - 21.43);
+    }
+	
+	System.out.println("Words: " + content.getWordsCount());
+        System.out.println("Sentences: " + content.getSentencesCount());
+        System.out.println("Characters: " + content.getCharsCount());
+        System.out.printf("The score is: %.2f\n", content.calculateARI());
+        int score = (int) Math.ceil(content.calculateARI());
+        System.out.println("This text should be understood by " + assignCategory(score) + " year olds.");
+    }
+ 
+    public static String assignCategory(int score) {
+        String[] category = new String[] {"5-6", "6-7", "7-9", "9-10", "10-11", "11-12", "12-13",
+                                          "13-14", "14-15", "15-16", "16-17", "17-18", "18-24", "+24"};
+ 
+        return category[score - 1];
+    }
+	
+	
+src/readability/Main.java
+package readability;
+ 
+import java.io.*;
+import static java.math.RoundingMode.DOWN;
+import java.text.DecimalFormat;
+ 
+public class Main {
+    public static void main(String[] args) throws IOException{
+ 
+        File file = new File(args[0]);
+ 
+        String line;
+        double contaParole = 0, contaFrasi = 0, contaLettere = 0;
+ 
+        System.out.println("The text is:");
+ 
+        try (BufferedReader br = new BufferedReader(new FileReader(file))){
+            while ((line = br.readLine()) != null) {
+                contaParole = line.split("\\s+").length;
+                contaFrasi = line.split("[?|\\.|!]").length;
+                contaLettere = line.replaceAll("\\s+", "").length();
+ 
+                System.out.println(line);
+            }
+        }
+ 
+        DecimalFormat df = new DecimalFormat("#.00");
+        df.setRoundingMode(DOWN);
+ 
+        double ARI = 4.71 * (contaLettere / contaParole) + 0.5 * (contaParole / contaFrasi) - 21.43;
+ 
+        System.out.println("\nWords: " + (int) contaParole + "\nSentences: " + (int) contaFrasi + "\nCharacters: " + (int) contaLettere +
+                "\nThe score is: " + df.format(ARI).replace(",", "."));
+ 
+        int scoreRounded = (int) Math.ceil(ARI);
+ 
+        String[] eta = {"5-6", "6-7", "7-9", "9-10", "10-11", "11-12", "12-13", "13-14", "14-15", "15-16", "16-17", "17-18", "18-24", "24+"};
+ 
+        String stampaRisultato = scoreRounded > 14 ? "This text should be understood by " + eta[eta.length - 1] + " year olds."
+                : "This text should be understood by " + eta[scoreRounded - 1] + " year olds.";
+ 
+        System.out.println(stampaRisultato);
+    }
+}
+
+
+try {
+            text = new String(Files.readAllBytes(Paths.get(args[0])));
+        } catch (IOException e) {
+            System.out.printf("File not found: %s%n", args[0]);
+        } catch (IndexOutOfBoundsException e) {
+            System.out.println("Please provide the file to process");
+        }
+        //printing the given text
+        System.out.printf("The text is:%n%s%n%n", text);
+
+        //counting the words
+        int words = 0;
+        Pattern pattern = Pattern.compile("[\\w,]+");
+        Matcher matcher = pattern.matcher(text);
+        while (matcher.find()) {
+            words++;
+        }
+        System.out.printf("Words: %d%n", words);
+
+        //counting the sentences
+        int sentences = 0;
+        pattern = Pattern.compile("\\.+|\\?+|!+|\\?!+|\\w$(?!\n)");
+        matcher = pattern.matcher(text);
+        while (matcher.find()) {
+            sentences++;
+        }
+        System.out.printf("Sentences: %d%n", sentences);
+
+        //counting the characters
+        int characters = 0;
+        pattern = Pattern.compile("\\S");
+        matcher = pattern.matcher(text);
+        while (matcher.find()) {
+            characters++;
+        }
+        System.out.printf("Characters: %d%n", characters);
+
+
+long characterCount = Arrays.stream(fileText.split(""))
+                .filter(s -> s.matches("\\S"))
+                .count();
+
+        List<String> sentences = Arrays.asList(fileText.split("[.?!]"));
+        long wordCount = sentences.stream()
+                .map(s -> s.trim().split("\\s+").length)
+                .mapToInt(i -> i)
+                .sum();
+
+        double score = 4.71 * ((double)characterCount / wordCount) + 0.5 * ((double)wordCount / sentences.size()) - 21.43;
+StringBuilder builder = new StringBuilder();
+        while (scanner.hasNextLine()) {
+            String input = scanner.nextLine().trim();
+            if (!input.isBlank()) {
+                String[] sentencesInALine = input.split("[?!.]");
+                for (String s: sentencesInALine) {
+                    if (!s.isBlank()) {
+                        sentences.add(s);
+                    }
+                }
+
+
+                wordCount += input.split(" ").length;
+                characterCount += input.replaceAll("\\s", "").split("").length;
+
+                builder.append(input).append("\n");
+            }
+        }
+
+        double readabilityScore = calculateReadability(characterCount, wordCount, sentences.size());
+
+        String output = "The text is:\n" +
+                builder.toString() +
+                "\nWords: " +
+                wordCount +
+                "\n" +
+                "Sentences: " +
+                sentences.size() +
+                "\n" +
+                "Characters: " +
+                characterCount +
+                "\n" +
+                "The score is: " +
+                readabilityScore +
+                "\n" +
+                "This text should be understood by " +
+                ageGrade((int) Math.ceil(readabilityScore)) +
+                " year olds.";
+        System.out.println(output);
+
+package readability;
+
+import java.io.File;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Scanner;
+import java.util.stream.Stream;
+
+public class Main {
+    public static void main(String[] args) {
+        try {
+            String text = new String(Files.readAllBytes(Path.of(args[0])));
+
+            double sentencesCount = text.split("[.!?]").length;
+            double wordsCount = text.split("\\s").length;
+            double charactersCount = text.replaceAll("\\s", "").length();
+
+            double score = 4.71 * (charactersCount / wordsCount) + 0.5 * (wordsCount / sentencesCount) - 21.43;
+            int scoreInt = (int) Math.ceil(score);
+            String age = null;
+            if (scoreInt > 0 && scoreInt < 4) {
+                age = String.format("%d-%d", scoreInt + 4, scoreInt + 5);
+            } else if (scoreInt > 3 && scoreInt < 13) {
+                age = String.format("%d-%d", scoreInt + 5, scoreInt + 6);
+            } else if (scoreInt == 13) {
+                age = "18-24";
+            } else {
+                age = "24+";
+            }
+
+            System.out.printf("Words: %.0f\nSentences: %.0f\nCharacters: %.0f\nThe score is: %.2f\n",
+                    wordsCount, sentencesCount, charactersCount, score);
+            System.out.printf("This text should be understood by %s year olds.", age);
+        } catch (IOException e) {
+        }
+    }
+}
+
+		
+ https://github.com/macik1423/readability/blob/master/readability/TextDecomposer.java
+ ========================================================================================================================
+ Files
+ Theory: Files
+It is often the case that a program needs to process and store data located outside: configuration settings, some dataset for processing, logs of execution and so on. The simplest way to store data is to use files that are supported by all modern operating systems. You can consider a file as a collection of data that is stored on a disk or another device, and that can be manipulated as a single unit when addressed by its name. Files can be organized into directories that act as folders for other files and directories.
+
+In this topic, we will learn how to work with files directly from a Java program.
+
+The File class:
+There is a class called File in the java.io package. An object of this class represents an existing or non-existing file or a directory. The class can be used to manipulate files and directories: creating, removing, accessing properties and more.
+The simplest way to create an object is to pass a string path to its constructor. The valid format of the string depends on the operating system:
+
+Windows uses backslashes for paths ('\'),
+Linux, OS X, Android and other UNIX-like systems use the forward slash ('/').
+You should keep in mind this difference while working with files.
+
+If your operating system is Windows, do not forget to use the escape character '\'.
+
+Let's create two objects of the File class for different platforms.
+File fileOnUnix = new File("/home/username/Documents");    // a directory on a UNIX-like system
+File fileOnWin = new File("D:\\Materials\\java-materials.pdf"); // a file on Windows
+
+The code will work even if a file or a directory does not actually exist in your file system. It does not create a new file or directory. It just represents "a virtual" file or directory that exists already or may be created in the future.
+
+To display the character for separating the path to a file in your case, you can print the following:
+
+System.out.println(File.separator); // '/' - for Linux
+Objects of the File class are immutable; that is, once created, the abstract pathname represented by an object will never change.
+
+Absolute and relative path:
+You've already seen examples of files described by the absolute path. Simply, a path is absolute if it starts with the root element of the file system. It has the complete information about the file location including the type of the operating system.
+
+It is considered as a bad practice to locate a file using its absolute path inside your programs, since you will lose the ability to reuse your program on different platforms. Another problem is that you cannot transfer the file along with the specified directory, you will have to change the code that accesses it.
+
+A relative path is a path that doesn't include the root element of the file system. This always starts from your working directory. This directory is represented by a . (dot). A relative path is not complete and needs to be combined with the current directory path in order to reach the requested file.
+
+Here is an example with a file inside the images directory which is in your working directory:
+
+File fileOnUnix = new File("./images/picture.jpg");
+File fileOnWin = new File("./images/picture.jpg");
+
+As you can see, both paths look exactly the same, which provides platform independence. Interesting, that the dot character can be skipped, so the path images/picture.jpg is also correct.
+
+In order to construct platform-independent programs, It is a common convention to use relative path whenever possible. You can also transfer all the working directory that contains images/picture.jpg without any code modifications.
+
+To access the parent directory of another directory, just write .. (double dot). So, ../picture.jpg is a file placed in the parent directory of the working directory. The relative path images\..\picture.jpg means the sub-directory images in the working directory, then the file picture.jpg. This is basically the same as just picture.jpg.
+
+Basic methods:
+An instance of File would have a list of methods. Take a look at some of them:
+String getPath() returns the string path to this file or directory;
+String getName() returns the name of this file or directory (just the last name of the path)
+boolean isDirectory() returns true if it is a directory and exists, otherwise, false;
+boolean isFile() returns true if it is a file that exists (not a directory), otherwise, false;
+boolean exists() returns true if this file or directory actually exists in your file system, otherwise, false;
+String getParent() returns the string path to the parent directory that contains this file or directory.
+
+The list is not complete, but for now, we will focus on these ones. For other methods, see here.
+https://docs.oracle.com/javase/7/docs/api/java/io/File.html
+Let's create an instance of an existing file and print out some info about it.
+File file = new File("/home/username/Documents/javamaterials.pdf");
+ 
+System.out.println("File name: " + file.getName());
+System.out.println("File path: " + file.getPath());
+System.out.println("Is file: " + file.isFile());
+System.out.println("Is directory: " + file.isDirectory());
+System.out.println("Exists: " + file.exists());
+System.out.println("Parent path:" + file.getParent());
+
+As we expect, the code prints the following:
+
+File name: javamaterials.pdf
+File path: /home/username/Documents/javamaterials.pdf
+Is file: true
+Is directory: false
+Exists: true
+Parent path: /home/username/Documents
+
+Suppose now we have an instance that represents an unexisting file and prints the info about it:
+
+File name: javamaterials1.pdf
+File path: /home/art/Documents/javamaterials1.pdf
+Is file: false
+Is directory: false
+Exists: false
+Parent path:/home/art/Documents
+
+The file does not exist and the application does not know its type.
+
+There is also a group of methods canRead(), canWrite(), canExecute() to test whether the application can read/modify/execute the file denoted by the path. It is recommended to use these methods, otherwise, you can encounter file access errors when your user does not have enough permissions to perform an operation with a file.
+
+We believe, the File class provides very clear API to process files and directories on different platforms.
+
+>>Files  Not a file, not a directory
+Imagine you have an instance of java.io.File named file. Both invocations file.isFile() and file.isDirectory() return false.
+
+Choose a case where this situation is possible.
+Ans:
+The file does not exist in the file system
+
+>>Files  Сorrect statements
+Select all the correct statements about files.
+
+Ans:
+It is possible to create an object of java.io.File by passing a string that represents the path to a file
+It is possible to create an instance of java.io.File that represents a non-existing file
+
+>>Files  Non-existing location
+Suppose you have an instance of the java.io.File class called file. It corresponds to a non-existing location on your disk.
+
+Which of the following lines return true?
+
+a) file.isDirectory()
+b) file.isFile()
+c) file.exists()
+ Select one option from the list
+
+Ans:
+None
+
+Files  File's tree traversal
+Here's one way to traverse all subdirectories and collect all files to a list.
+
+The method listFiles returns the nested files and directories of a directory as an array.
+1	public List<File> getAllFiles(File rootDir) {
+2      File[] children = rootDir.listFiles();
+3      if (children == null || children.length == 0) {
+4          return Collections.emptyList();
+5      }
+6
+7      List<File> files = new ArrayList<>();
+8      for (File child : children) {
+9          if (child.__) {
+10             files.addAll(getAllFiles(child));
+11         } else {
+12             files.add(child);
+13         }
+14     }
+15
+16     return files;
+17 }
+Replace the underscore with correct code (line 9) to make the code correct: it should collect all files in a current directory and its subdirectories.
+
+ Enter a short text
+
+Ans:
+isDirectory()
+
+>>Files  Are siblings?
+Implement the method areSiblings that checks if the files have same parent.
+
+It should take two files and return true if the files have the same parent and false otherwise.
+Sample Input 1:
+
+dir/file1.txt
+dir/file2.txt
+Sample Output 1:
+
+true
+
+Ans:
+class Siblings {
+
+    public static boolean areSiblings(File f1, File f2) {
+        // implement me
+        if (f1.getParent().equals(f2.getParent())) {
+            System.out.print("true");
+        } else {
+            System.out.print("false");
+        }
+    }
+}
+
+Alternate Ans:
+class Siblings {
+
+    public static boolean areSiblings(File f1, File f2) {
+        // implement me
+        return f1.getParent().equals(f2.getParent()) ? true : false;
+    }
+}
+
+
+Theory: Reading files
+The standard Java class library provides several ways to read data from files. Some of them are quite old, others have appeared recently. In this topic, we will consider only two basic methods, which is quite enough for now. You can choose the one that is most suitable for you.
+
+Reading data using Scanner
+It is possible to use java.util.Scanner to read data from files. This class is a high-level approach to read input data. It allows reading primitive types or strings by using regular expressions.
+First of all, we need to create an instance of java.io.File and then an instance of Scanner passing the file object. After that, we can get data from the file by using the scanner in the same way as we read from the standard input.
+
+Suppose you have a string called pathToFile. It keeps the path to a file that contains a sequence of numbers separated by spaces.
+
+Let's create a file object and then a scanner to read data from the file.
+File file = new File(pathToFile);
+Scanner scanner = new Scanner(file); // it throws FileNotFoundException (checked)
+
+When you create an instance of Scanner passing a file, you must handle the checked exception FileNotFoundException. You can also declare the method as throwing this exception.
+
+Now, we can use methods of Scanner to read data as strings, integers and so on.
+
+Let's read a line from the file
+while (scanner.hasNext()) {
+    System.out.print(scanner.nextLine());
+}
+
+This code reads each line from the file and outputs it to the standard output.
+After using a scanner, we should close the object to avoid leaks. A convenient way to close scanners and handle exceptions is to use the try-with-resources statement as below. Read more about try-with-resources in the official tutorial.
+
+https://en.wikipedia.org/wiki/Resource_leak
+https://docs.oracle.com/javase/tutorial/essential/exceptions/tryResourceClose.html
+
+The full example of Scanner usage presented below:
+
+File file = new File(pathToFile);
+ 
+try (Scanner scanner = new Scanner(file)) {
+    while (scanner.hasNext()) {
+        System.out.print(scanner.nextLine() + " ");
+    }
+} catch (FileNotFoundException e) {
+    System.out.println("No file found: " + pathToFile);
+}
+
+Then, for a file containing:
+
+first line
+second line
+third line
+
+The program outputs to console the following result:
+
+first line second line third line
+
+The scanner also allows you to read integers, boolean, doubles, and other types. Methods have corresponding names like nextInt, nextBoolean and etc. In case of no new data is available any of next methods returns java.util.NoSuchElementException.
+
+Instead of displaying the read data in the standard output, you can store it in an array or a string.
+
+Reading all text from a file as a single string:
+Since Java 1.7 there is a set of new classes and methods for handling files. Within this topic, we will confine ourselves to learning how to read an entire text file. Note that this method should be used only for small text files. By small we mean that their size is smaller than JVM available RAM. That's more than enough for learning and performing small tasks.
+
+First of all, make the following imports:
+
+import java.nio.file.Files;
+import java.nio.file.Paths;
+
+The Files class consists of methods that operate on files, the Paths class contains a set of methods that return a special object to represent the path to a file.
+
+The following method returns all text from a specified file:
+public static String readFileAsString(String fileName) throws IOException {
+    return new String(Files.readAllBytes(Paths.get(fileName)));
+}
+
+Let's try to use the method readFileAsString to read the source code from the file HelloWorld.java and print it to the standard output. HelloWorld.java contains a traditional basic program mentioned in one of the earliest topics "The first program".
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+ 
+public class ReadingFileDemo {
+    public static String readFileAsString(String fileName) throws IOException {
+        return new String(Files.readAllBytes(Paths.get(fileName)));
+    }
+ 
+    public static void main(String[] args) {
+        String pathToHelloWorldJava = "/home/username/Projects/hello-world/HelloWorld.java";
+        try {
+            System.out.println(readFileAsString(pathToHelloWorldJava));
+        } catch (IOException e) {
+            System.out.println("Cannot read file: " + e.getMessage());
+        }
+    }
+}
+
+It prints the source code:
+
+package org.hyperskill;
+ 
+public class HelloWorld {
+    public static void main(String[] args) {
+        System.out.println("Hello, world!");
+    }
+}
+
+Note that it is not difficult to modify the code above so that it would read the path to the target file from the standard input instead of hardcoding it.
+
+>>Reading files  What is true?
+Select one correct statement about java.util.Scanner.
+Ans:
+It can read data from a file as well as from the standard input
+
+>>Reading files  Error handling of Files
+Look at the code below.
+
+Files.readAllBytes(Path.of(pathToFile))
+What kind of exception may be thrown here?
+Ans:
+java.io.IOException
+
+>>Reading files  Suspicious line
+Look at the code below:
+
+String pathToFile = "file.txt";
+try (Scanner scanner = new Scanner(new File(pathToFile))) {
+    scanner.nextLine();
+    scanner.nextLine();
+    System.out.println(scanner.nextLine());
+}
+Our file file.txt contains just 2 lines:
+
+first
+second
+What does code print in a console in this case?
+
+Hint: to find the right answer you may run this piece of code on your computer and check the result.
+
+ Select one option from the list
+ Ans:
+ java.util.NoSuchElementException
+
+>>Reading files  Reading int
+Take a look at the following code. It reads the first mention of int in the file.
+
+String pathToFile = "file.txt";
+try (Scanner scanner = new Scanner(new File(pathToFile))) {
+    System.out.println(scanner.nextInt());
+}
+If file.txt consists of these lines:
+
+start line
+line two
+end line
+What will be printed out in the console?
+
+Hint: to find the right answer you may run this piece of code on your computer and check the result.
+
+ Select one option from the list
+ Ans:
+ stacktrace of java.util.InputMismatchException
+ 
+>>Reading files  Count even numbers
+Here is a file containing a sequence of integers. Each number begins a new line.
+
+Download the file and write a Java program that counts the number of even numbers in this file. You should stop counting either if you get 0 or the last number is reached.
+
+Enter the result. 
+
+============================================================================================================
+CommandLine Args
+Theory: Command-line arguments
+A Java application can accept data from the external world using command-line arguments. JVM wraps the argument in the array of strings and passes the array to the main method.
+Here is a declaration of the main method:
+
+public static void main(String[] args)
+
+The array of strings args contain string arguments from the command line.
+
+Let's assume we have the following code in the file Main.java.
+
+public class Main {
+ 
+    public static void main(String[] args) {
+        System.out.println("passed arguments: " + args.length);
+    }
+}
+
+This code outputs the string containing a number of passed arguments.
+
+Let's compile this code (the result is bytecode):
+
+javac Main.java
+
+Then run without parameters the bytecode:
+
+java Main
+
+It outputs:
+
+passed arguments: 0
+Let's run it with two parameters separated by space:
+
+java Main arg1 arg2
+It outputs:
+
+passed arguments: 2
+So, in the command-line interface arguments must be separated by spaces.
+
+>>Command-line arguments  Passing three arguments
+You have a compiled bytecode in the file Demo.class.
+
+In what case we pass exactly three arguments to the program?
+Ans:
+java Demo arg1 arg2 arg3
+
+>>Command-line arguments  How to start a program
+Suppose, we want to start the program Main.class.
+
+Select all correct statement.
+Ans:
+java Main starts the program without command-line arguments.
+
+java Main Main Main Main starts the program with three command-line arguments.
+
+>>Command-line arguments  Parameters and their values
+Write a program that takes command-line arguments in the format:
+
+parameter1 value1 parameter2 value2 ...
+and outputs them in the standard output in the format:
+
+parameter1=value1
+parameter2=value2
+...
+It is guaranteed, that each parameter is followed by a value.
+
+Please, do not rename the provided class Problem.
+
+Sample Input 1:
+
+config-path /something/there config-format json
+Sample Output 1:
+
+config-path=/something/there
+config-format=json
+Ans:
+class Problem {
+
+    public static void main(String[] args) {
+        // Write your code here
+        for (int i = 0; i < args.length; i = i + 2) {
+            System.out.println(args[i] + "=" + args[i + 1]);    
+        }
+    }
+}
+
+>>Command-line arguments  The index of an argument
+Write a program that searches for an argument equal to "test" (without quotes), and then outputs its index in the array args. If it is not found, the program must output "-1". This argument can occur no more than once.
+
+Please, do not rename the provided class Problem.
+
+Sample Input 1:
+
+arg1 arg2 test
+Sample Output 1:
+
+2
+Sample Input 2:
+
+arg1 arg2 arg3    
+Sample Output 2:
+
+-1
+
+Ans:
+class Problem {
+    public static void main(String[] args) {
+        int ind = -1;
+        for (int i = 0; i < args.length; i++) {
+            if ("test".equals(args[i])) {
+                ind = i; 
+            }
+        }
+        System.out.print(ind);
+    }
+}
+
+
+>>Command-line arguments  Advanced calculator
+Write a program that takes an operator ("MAX", "MIN", "SUM") and a sequence of numbers as the command-line arguments and then outputs the result of the operator in the standard output.
+The description of the operators:
+
+"MAX" finds the max value of a sequence of numbers;
+"MIN" find the min value of a sequence of numbers
+"SUM" calculates the sum of a sequence of numbers.
+It is guaranteed that a correct operator and at least one number will be passed to the program.
+
+Please, do not rename the provided class Problem.
+
+Sample Input 1:
+
+MAX 7 3 4 1 8 11 3 2
+Sample Output 1:
+
+11
+
+Ans:
+/* Please, do not rename it */
+class Problem {
+
+    public static void main(String[] args) {
+        String operator = args[0];
+        // write your code here
+        switch (operator) {
+            case "MAX":
+                findMax(args);
+                break;
+            case "MIN":
+                findMin(args);
+                break;
+            case "SUM":
+                findSum(args);   
+                break;
+            default:
+                break;    
+                     
+        }
+    }
+    
+    public static void findMax(String[] args) {
+        int max = Integer.parseInt(args[1]);
+        for (int i = 2; i < args.length; i++) {
+            int num = Integer.parseInt(args[i]);
+            if (num > max) {
+                max = num;
+            }
+        }
+        System.out.println(max);
+    }
+    
+    public static void findMin(String[] args) {
+        int min = Integer.parseInt(args[1]);
+        for (int i = 2; i < args.length; i++) {
+            int num = Integer.parseInt(args[i]);
+            if (num < min) {
+                min = num;
+            }
+        }
+        System.out.println(min);
+    }
+    
+    public static void findSum(String[] args) {
+        int sum = 0;
+        for (int i = 1; i < args.length; i++) {
+            int num = Integer.parseInt(args[i]);
+            sum += num;
+        }
+        System.out.println(sum);
+    }
+}
+Alternative Ans:
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+/* Please, do not rename it */
+class Problem {
+
+    public static void main(String[] args) {
+        String operator = args[0];
+        List<Integer> numbers = new ArrayList<>();
+        for (int i = 1; i < args.length; i++) {
+            numbers.add(Integer.parseInt(args[i]));
+        }
+        switch (operator) {
+            case "MAX":
+                System.out.println(Collections.max(numbers));
+                break;
+            case "MIN":
+                System.out.println(Collections.min(numbers));
+                break;
+            case "SUM":
+                int sum = 0;
+                for (int number : numbers) {
+                    sum += number;
+                }
+                System.out.println(sum);
+                break;
+            default:
+                System.out.println("Unknown operator");
+                break;
+        }
+    }
+}
+
+import java.util.Arrays;
+
+/* Please, do not rename it */
+class Problem {
+
+    public static void main(String[] args) {
+        String operator = args[0];
+        switch (operator) {
+            case "MAX":
+                Integer max = Arrays.stream(args).skip(1).map(Integer::valueOf).max(Integer::compareTo).get();
+                System.out.println(max);
+                break;
+            case "MIN":
+                Integer min = Arrays.stream(args).skip(1).map(Integer::valueOf).min(Integer::compareTo).get();
+                System.out.println(min);
+                break;
+            case "SUM":
+                Integer sum = Arrays.stream(args).skip(1).map(Integer::valueOf).mapToInt(Integer::intValue).sum();
+                System.out.println(sum);
+                break;
+            default:
+                System.out.println("Unknown operator");
+                break;
+        }
+
+    }
+}
+
+import java.util.Arrays;
+
+/* Please, do not rename it */
+class Problem {
+
+    public static void main(String[] args) {
+        String operator = args[0];
+        String[] subArray = Arrays.copyOfRange(args, 1, args.length);
+        switch (operator) {
+            case "MAX":
+                int max = Arrays.stream(subArray)
+                        .mapToInt(Integer::parseInt)
+                        .max()
+                        .orElse(0);
+                System.out.println(max);
+                break;
+            case "MIN":
+                int min = Arrays.stream(subArray)
+                        .mapToInt(Integer::parseInt)
+                        .min()
+                        .orElse(0);
+                System.out.println(min);
+                break;
+            default:
+                int sum = Arrays.stream(subArray)
+                        .mapToInt(Integer::parseInt)
+                        .sum();
+                System.out.println(sum);
+                break;
+
+        }
+    }
+}
+
+
+===============================================================================================
+Exception Handling
+Theory: Exception handling
+As you already know, an exception interrupts the normal execution of a program. Normally this is not what we want to happen. Luckily, it is possible to write some code that will handle the exception without stopping the whole program.
+
+To do that, Java provides the exception handling mechanism that works with both checked and unchecked exceptions. After a line of code throws an exception, the Java runtime system attempts to find a suitable handler for it. Such a handler can be located in the same method where the exception occurred or in the calling method. As soon as a suitable handler is found and executed, the exception is considered as handled and the program runs in the normal mode.
+
+Let's learn three keywords for handling exceptions: try, catch and finally.
+
+The try-catch statement
+Here is a simple try-catch template for handling exceptions:
+
+try {
+    // code that may throw an exception
+} catch (Exception e) {
+    // code for handling the exception
+}
+
+The try block is used to wrap the code that may throw an exception. This block can include all lines of code, including method calls.
+The catch block is a handler for the specified type of exception and all of its subclasses. This block is executed when an exception of the corresponding type occurs in the try block.
+
+Note that the specified type in a catch block must extend the Throwable class.
+In the presented template, the catch block can handle exceptions of the Exception class and all classes derived from it.
+
+The following example demonstrates the execution flow with try and catch.
+System.out.println("before the try-catch block"); // it will be printed
+ 
+try {
+    System.out.println("inside the try block before an exception"); // it will be printed
+ 
+    System.out.println(2 / 0); // it throws ArithmeticException
+ 
+    System.out.println("inside the try block after the exception"); // it won't be printed
+} catch (Exception e) {
+    System.out.println("Division by zero!"); // it will be printed
+}
+ 
+System.out.println("after the try-catch block"); // it will be printed
+
+The output:
+
+before the try-catch block
+inside the try block before an exception
+Division by zero!
+after the try-catch block
+
+The program does not print "inside the try block after the exception" since the ArithmeticException aborted the normal flow of the execution. Instead, it executes the print statement in the catch block. After completion of the catch block, the program executes the next statement (printing "after the try-catch block") without returning inside the try block again.
+
+Replacing Exception with ArithmeticException or RuntimeException in the catch statement does not change the execution flow of the program. But replacing it with NumberFormatException will make the handler unsuitable for the exception and the program will fail.
+
+As we noted earlier, the try-catch statement can handle both checked and unchecked exceptions. But there is a difference: checked exceptions must be wrapped with the try-catch block or declared to be thrown in the method, while unchecked exceptions don't have to.
+
+Getting info about an exception
+When an exception is caught by a catch block, it is possible to get some information on it:
+
+try {
+    double d = 2 / 0;
+} catch (Exception e) {
+    System.out.println(e.getMessage());
+}
+This code prints:
+
+An exception occured: / by zero
+
+Catching multiple exceptions:
+It is always possible to use a single handler for all types of exceptions:
+
+try {
+    // code that may throw exceptions
+} catch (Exception e) {
+    System.out.println("Something goes wrong");
+}
+
+Obviously, this approach does not allow us to perform different actions depending on the type of exception that has occurred. Fortunately, Java supports the use of several handlers inside the same try block.
+
+try {
+    // code that throws exceptions
+} catch (IOException e) {
+    // handling the IOException and its subclasses    
+} catch (Exception e) {
+    // handling the Exception and its subclasses
+}
+
+When an exception occurs in the try block, the runtime system determines the first suitable catch block according to the type of the exception. Matching goes from top to down.
+
+Important, the catch block with the base class has to be written below all blocks with subclasses. In other words, the more specialized handlers (like IOException) must be written before the more general ones (like Exception). Otherwise, the code won't compile.
+
+Since Java 7, you can use multi-catch syntax to make several exceptions can be handled in the same way :
+
+try {
+    // code that may throw exceptions
+} catch (SQLException | IOException e) {
+    // handling SQLException, IOException and their subclasses
+    System.out.println(e.getMessage());
+} catch (Exception e) {
+    // handling any other exceptions
+    System.out.println("Something goes wrong");
+}
+
+In the code above SQLException and IOException (alternatives) are separated by the | character. They will be handled in the same way.
+
+Note that alternatives in a multi-catch statement cannot be each other's subclasses.
+
+The finally block:
+There is another possible block called finally. All statements present in this block will always execute regardless of whether an exception occurs in try block or not.
+
+try {
+    // code that may throw an exception
+} catch (Exception e) {
+    // exception handler
+} finally {
+    // code always be executed
+}
+
+In this template, the finally block is executed after the catch block.
+
+The following example illustrates the order of execution of the try-catch-finally statement.
+
+try {
+    System.out.println("inside the try block");
+    Integer.parseInt("101abc"); // throws NumberFormatException
+} catch (Exception e) {
+    System.out.println("inside the catch block");
+} finally {
+    System.out.println("inside the finally block");
+}
+ 
+System.out.println("after the try-catch-finally block");
+
+The output:
+
+inside the try block
+inside the catch block
+inside the finally block
+after the try-catch-finally block
+
+If we remove the line that throws NumberFormatException, the finally block is still executed after the try block.
+
+inside the try block
+inside the finally block
+after the try-catch-finally block
+
+Interesting: the finally block is executed even if an exception occurs in the catch block.
+
+It is also possible to write try and finally without a catch block at all.
+
+try {
+    // code that may throw an exception
+} finally {   
+    // code always be executed
+}
+
+In this template, the finally block is executed right after the try block.
+
+
+Where to handle an exception:
+Technically, an exception can be handled in the method where it occurs or in the calling method. The best approach to handle an exception is to do it in a method that has sufficient information to make the correct decision based on this exception.
+
+With that, we finish the consideration of the try-catch-finally construction and its applications.
+
+Exercises:
+>>Exception handling  Catch all exceptions
+Which one of the following classes can be used to catch all exceptions (excluding low-level errors)?
+
+Ans:
+Exception
+
+>>Exception handling  What exceptions can be handled
+What type of exception cannot be handled by the following catch block?
+
+catch (Exception e) {
+    // do something
+}
+ Select one option from the list
+ Ans:
+ Throwable
+ 
+>>Exception handling  String to double conversion
+Consider a method that takes a string and converts it to a double. If the input string happen to be null or of an unsuitable format, a runtime exception occurs and the program fails.
+
+Fix the method so it would catch any exceptions and return the default value 0 (zero) if an exception occurred.
+
+Sample Input 1:
+
+123.0
+Sample Output 1:
+
+123.0
+Sample Input 2:
+
+15.5
+Sample Output 2:
+
+15.5
+
+Ans:
+class Converter {
+
+    /**
+     * It returns a double value or 0 if an exception occurred
+     */
+    public static double convertStringToDouble(String input) {
+        try {
+            return Double.parseDouble(input);    
+        } catch (Exception e) {
+            return 0;
+        }
+        
+    }
+}
+
+
+>>Exception handling  Catching some exceptions
+Consider the two methods: methodThrowingExceptions and methodCatchingSomeExceptions.
+
+The first one throws unchecked exceptions of different types.
+Your task is to implement the second method. It must call the first method and catch two types of exceptions:
+
+ArrayIndexOutOfBoundsException
+NumberFormatException
+
+Inside the catch block (or blocks) you should print the name of the handled exception class (only name, without packages) to the standard output, like:
+
+ArrayIndexOutOfBoundsException
+
+Other types of exceptions must not be caught by the methodCatchingSomeExceptions.
+
+Ans:
+import java.util.*;
+
+public class Main {
+
+    private static String array = null;
+
+    public static void methodCatchingSomeExceptions() {
+        // invoke methodThrowingExceptions here and catch some types of exceptions
+        try {
+            methodThrowingExceptions();            
+        } catch (ArrayIndexOutOfBoundsException ae) {
+            System.out.print("ArrayIndexOutOfBoundsException");
+        } catch (NumberFormatException ne) {
+            System.out.print("NumberFormatException");
+        }
+
+    }
+
+    /* Do not change code below */
+    public static void methodThrowingExceptions() {
+        if (array == null) {
+            return;
+        }
+        int[] integers = Arrays.stream(array.split(" "))
+                .mapToInt(Integer::parseInt)
+                .toArray();
+        Object someValue = integers[integers[0]];
+        if (integers[0] + integers[1] == integers[2]) {
+            integers = null;
+        }
+        int sum = 0;
+        for (int i : integers) {
+            sum += i;
+        }
+        int meanValue = integers.length / sum;
+        if (integers[2] == integers[3]) {
+            String string = (String) someValue;
+            System.out.print("Random value is " + string);
+        }
+        System.out.print("Mean is " + meanValue);
+    }
+
+
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        array = scanner.nextLine();
+        try {
+            methodCatchingSomeExceptions();
+        } catch (Exception e) {
+            System.out.println("Caught: " + e.getClass().getName());
+        }
+    }
+}
+
+
+>>Exception handling  Converting and multiplying
+Your task is to write a program that reads a sequence of strings and converts them to integer numbers, multiplying by 10. Some input strings may have an invalid format, for instance: "abc". The sequence’s length may be different. It’s ending is indicated by “0”. Zero serves as a stop character and should not be included in the sequence.
+
+If a string can be converted to an integer number, output the number multiplied by 10. Otherwise, output the string "Invalid user input: X" where X is the input string. To better understand see examples below.
+
+To implement this logic, use the exception handling mechanism.
+
+Input data format:
+
+A sequence of integer numbers and other strings, each in a new line
+
+Output data format:
+
+A sequence of integer numbers and warnings, each in a new line
+
+Ans:
+import java.util.NoSuchElementException;
+import java.util.Scanner;
+
+class Main {
+    public static void main(String[] args) {
+        // put your code here
+        Scanner scanner = new Scanner(System.in);
+        String inStr = "";
+        while (!(inStr = scanner.next()).equals("0")) {
+            try {
+                int inNum = Integer.parseInt(inStr);
+                inNum *= 10;    
+                System.out.println(inNum);
+            } catch (NumberFormatException | NoSuchElementException  e) {
+                System.out.println("Invalid user input: " + inStr);
+            } 
+            
+        }
+    }
+}
+
+Alternative Solutions:
+import java.util.Scanner;
+
+class ExceptionExample {
+
+    public static void main(String[] args) {
+        final Scanner scanner = new Scanner(System.in);
+
+        while (true) {
+            String line = null;
+            try {
+                line = scanner.nextLine();
+                int val = Integer.parseInt(line);
+
+                if (val == 0) {
+                    break;
+                }
+
+                System.out.println(val * 10);
+            } catch (Exception e) {
+                System.out.println("Invalid user input: " + line);
+            }
+        }
+    }
+}
+
+ import java.util.Scanner;
+
+class Main {
+    public static void main(String[] args) {
+        Scanner scan = new Scanner(System.in);
+        String str = "";
+        do {
+            try {
+                str = scan.next();
+                if (Integer.parseInt(str) == 0) {
+                    break;
+                } else {
+                    System.out.println(Integer.parseInt(str) * 10);
+                }
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid user input: " + str);
+            }
+        } while (scan.hasNext());
+
+
+    }
+}
+
+==================================================================================================
+Exercice Collatz
+The while and do-while loops  Collatz conjecture
+Given natural number n. Generate a sequence of integers, described in the Collatz conjecture:
+
+If n is an even number, divide it in half, if it is odd, multiply it by 3 and add 1. Repeat this operation until we get the number 1 as a result.
+
+For example, if the number n = 17, then the sequence looks as the following:
+17 52 26 13 40 20 10 5 16 8 4 2 1
+Such a sequence will stop at number 1 for any primary natural number n.
+
+Output format:
+Sequence of integers in a single line, separated by spaces.
+
+Sample Input 1:
+
+17
+Sample Output 1:
+
+17 52 26 13 40 20 10 5 16 8 4 2 1
+Sample Input 2:
+
+1
+Sample Output 2:
+
+1
+
+Ans:
+import java.util.Scanner;
+
+class Main {
+    public static void main(String[] args) {
+        // put your code here
+        Scanner scanner = new Scanner(System.in);
+        int num = scanner.nextInt();
+        
+        //System.out.print(num);
+        
+        
+        while (num != 1) {
+            System.out.println(num+" ");
+            if (num % 2 == 0) {
+                num = num/2;
+            } else {
+                num *= 3;
+                num += 1;
+            }
+        }
+        
+        if (num == 1) {
+            System.out.print(num);
+        } 
+    }
+}
+
+Alternative SOlution:
+import java.util.Scanner;
+class Main {
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        int num = scanner.nextInt();
+        while (num != 1) {
+            System.out.print(num + " ");
+            num = num % 2 == 0 ? num / 2 : num * 3 + 1;
+        }
+        System.out.print(num);
+    }
+}
+
+
+Integer types and operations  Arithmetic expression
+Write a program that reads an integer value n from the standard input and outputs the result of the following arithmetic expression:
+
+
+((n + 1) * n + 2) * n + 3
+Ans:
+import java.util.Scanner;
+
+class Main {
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        // put your code here
+        int num = scanner.nextInt();
+        int res = ((num +1) * num + 2) * num + 3;
+        System.out.print(res);
+    }
+}
+
+===============================================================================
+NotesMain
+The declaration of the main method
+Java is primarily an object-oriented language. It means a Java program can be considered as a collection of objects that communicate via calling each other's methods. A typical Java program includes a lot of classes, interfaces, objects and other concepts from the object-oriented programming.
+Even the simplest "procedural-style" program should have at least one class and the main method inside to start the program. The main method is the entry point for any applications. Ever since Java 7 there has been no other way to start an application without this method (excluding the case when you start your application inside a special container for applications but it is not considered in our materials).
+public class Main {
+ 
+    public static void main(String[] args) {
+        System.out.println("Hello, Java");
+    }
+}
+Here is a class named Main. The class contains the main method for starting the program.
+
+It is important to mention that a class containing the main method can have any name, but the main method should always have the same name.
+
+Let's take a closer look at the declaration of the main method:
+
+public static void main(String[] args)
+the keyword public indicates that the method can be invoked from everywhere;
+the keyword static indicates the method can be invoked without creating an instance of the class;
+the keyword void indicates the method doesn't return any value;
+the array variable args contains arguments entered at the command line, the array is empty if there are no arguments.
+
+As you can see, even the simplest Java application contains a lot of concepts. All of them will be studied in the next topics related to methods and the object-oriented programming. Now you should just understand how to write and run a simple java program with the main method.
+
+Invalid declarations of the main method
+If the main method has an invalid declaration, two cases are possible:
+
+your program cannot be compiled
+your program is successfully compiled but can't be started
+Your program cannot be compiled. It is a case when the main method declaration breaks the syntax of Java.
+
+Examples:
+
+invalid method declaration: no returning value (even void).
+public static main(String[] args)
+invalid method declaration: a mistake in the keyword (pubic instead of public).
+pubic static void main(String[] args)
+
+A program can be compiled but cannot be run. It is a case when the main method has a correct declaration as a regular method but doesn't satisfy the specific requirement of the main method.
+
+Examples:
+
+invalid arguments (should be String[] args)
+public static void main(String args) {
+    System.out.println("Hello, Java");
+}
+the method declaration has no keyword static
+public void main(String[] args) { 
+    System.out.println("Hello, Java");
+}
+In both cases, an error happens at runtime.
+
+Conclusion
+So, the main method is the entry point of any Java programs. It has a very specific syntax which you need to remember.
+
+Arrays as Parameters
+Theory: Arrays as parameters
+Passing arrays to methods
+A method can have parameters of any types including arrays, strings, primitive types and so on.
+
+Here is an example, the method processArray has a single parameter of the type int[]:
+
+public static void processArray(int[] array) { /* do something */ }
+In the body of the method, we can process the input array in any way.
+A parameter of an array type looks like a primitive type parameter. But there is one important difference related to the fact that an array is a reference type.
+
+When you pass a value of a primitive type to a method, a copy of the value is created. When you pass an array to a method, a copy of the reference is created but the value is the same. It means if you change the actual value (elements of an array) in the body of a method, you will see these changes outside the method.
+
+The following method swaps the first and the last elements of its parameter (array).
+public static void swapFirstAndLastElements(int[] nums) { // nums is an array
+    if (nums.length < 1) {
+        return; // it returns nothing, i.e. just exits the method
+    }
+ 
+    int temp = nums[nums.length - 1]; // save the last element in temporary local variable
+    nums[nums.length - 1] = nums[0];  // now, the last element is the first
+    nums[0] = temp;                   // now, the first element is the previous last
+}
+
+Calling the method from the main method:
+public static void main(String[] args) {
+ 
+    int[] numbers = { 1, 2, 3, 4, 5 }; // numbers
+ 
+    System.out.println(Arrays.toString(numbers)); // before swapping
+ 
+    swapFirstAndLastElements(numbers); // swapping
+ 
+    System.out.println(Arrays.toString(numbers)); // after swapping
+}
+
+The output is:
+
+[1, 2, 3, 4, 5]
+[5, 2, 3, 4, 1]
+So, in the body of the main method, an array is visible as modified.
+
+Varargs
+It's possible to pass an arbitrary number of the same type arguments to a method using the special syntax named varargs (variable-length arguments). These arguments are specified by three dots after the type. In the body of the method, you can process this parameter as a regular array of the specified type.
+
+The following method takes an integer vararg parameter and outputs the number of arguments in the standard output using the length property of arrays.
+public static void printNumberOfArguments(int... numbers) {
+    System.out.println(numbers.length);
+}
+
+As you can see, here is a special syntax ... is used to specify a vararg parameter.
+
+Now, you can invoke the method passing several integer numbers or an array of ints.
+
+printNumberOfArguments(1);
+printNumberOfArguments(1, 2);
+printNumberOfArguments(1, 2, 3);
+printNumberOfArguments(new int[] { }); // no arguments here
+printNumberOfArguments(new int[] { 1, 2 });
+
+This code outputs:
+
+1
+2
+3
+0
+2
+
+This example also demonstrates the difference between the arguments and parameters of a method. The method has only a single parameter but it can be called with several arguments.
+
+Varargs and other parameters
+If a method has more than one parameter, a vararg parameter must be the last parameter in the declaration of the method.
+
+Here is an incorrect example:
+
+public static void method(double... varargs, int a) { /* do something *
+
+The correct version of the method is:
+
+public static void method(int a, double... varargs) { /* do something */ }
+
+ In Java, only one varargs argument is allowed and it must be the last parameter of the signature.
+ 
+
+ 
+ Exercises:
+>> Arrays as parameters  A method taking an array
+ Choose all correct ways to declare a method that can take the following array:
+
+long[] longNumbers = { 5L, 8L, 10L };
+
+Ans:
+public void method(long... longNumbers)
+public void method(long[] longNumbers)
+
+>>Arrays as parameters  What does the method print
+Given a method that takes an array:
+public static void method(int[] array) {
+    array = new int[] { 1, 2, 3 };
+}
+
+We invoke this method inside another one:
+
+ 
+int[] numbers = { 4, 5, 6 };
+ 
+ 
+method(numbers);
+ 
+ 
+System.out.println(Arrays.toString(numbers));
+
+What does this code print to the standard output?
+Ans:
+[4, 5, 6]
+
+>> Arrays as parameters  Adding values
+Write a method named addValueByIndex.
+
+The method should take an array of longs and add value to the specified element by its index.
+
+Here is a description of the parameters:
+
+an array of longs;
+the index of an element (int);
+a value for adding (long).
+The method must return nothing.
+
+The following invocation should work correctly:
+
+addValueByIndex(array, index, value);
+Where array is an array of longs, index is an integer variable, value is a long value for adding.
+Ans:
+import java.util.*;
+
+public class Main {
+
+    // write a method here
+    public static void addValueByIndex(long[] arr, int idx, long val) {
+        long tmp = arr[idx];
+        tmp += val;
+        arr[idx] = tmp;
+    }
+
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        long[] array = Arrays.stream(scanner.nextLine().split(" "))
+                .mapToLong(Long::parseLong)
+                .toArray();
+        int index = scanner.nextInt();
+        long value = scanner.nextLong();
+        addValueByIndex(array, index, value);
+        Arrays.stream(array).forEach(e -> System.out.print(e + " "));
+    }
+}
+
+>> Arrays as parameters  Sorting numbers
+Implement a method for sorting a given array of integers in the ascending order.
+You can use any algorithm for sorting it.
+Sample Input 1:
+
+3 1 2
+Sample Output 1:
+
+1 2 3 
+
+Ans:
+package com.test;
+
+import java.util.Arrays;
+import java.util.Scanner;
+
+public class P01 {
+
+    public static void sort(int[] numbers) {
+        // write your code here
+        for (int i = 0; i < numbers.length; i++) {
+            int temp = numbers[i];
+            for (int j = i + 1; j < numbers.length; j++) {
+                if (temp > numbers[j]) {
+                    numbers[i] = numbers[j];
+                    numbers[j] = temp;                    
+                    temp = numbers[i];
+                }
+            }   
+        }
+        
+    }
+
+    /* Do not change code below */
+    public static void main(String[] args) {
+        final Scanner scanner = new Scanner(System.in);
+        String[] values = scanner.nextLine().split("\\s+");
+        int[] numbers = Arrays.stream(values)
+                .mapToInt(Integer::parseInt)
+                .toArray();
+        sort(numbers);
+        Arrays.stream(numbers).forEach(e -> System.out.print(e + " "));
+    }
+}
+
+>> Arrays as parameters  Get first and last elements
+Write a method named getFirstAndLast. The method should take an array of ints and return a new array of ints. The returned array must contain two elements: the first and the last elements of the input array.
+
+It's guaranteed, the input array always has at least one element.
+Sample Input 1:
+
+1 2 3 4
+Sample Output 1:
+
+1 4
+
+Ans:
+ import java.util.*;
+
+public class Main {
+
+    // write a method here
+    public static int[] getFirstAndLast(int... nums) {
+        int[] res = new int[2];
+        
+        if (nums.length == 1) {
+            res[0] = nums[0];
+            res[1] = nums[0];
+        }
+        
+        
+        res[0] = nums[0];
+        res[1] = nums[nums.length-1];
+        return res;        
+    }
+
+    /* Do not change code below */
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        int[] array = Arrays.stream(scanner.nextLine().split(" "))
+                .mapToInt(Integer::parseInt)
+                .toArray();
+        int[] result = getFirstAndLast(array);
+        Arrays.stream(result).forEach(e -> System.out.print(e + " "));
+    }
+}
+
+Alternative solution:
+
+return new int[] {el[0], el[el.length - 1]};
+
+Theory: Package
+Grouping classes together
+Large Java projects have a lot of classes. It's difficult to manage them if they are stored in the same directory. Packages provide a mechanism for grouping classes together in the same module (package). A package can contain other packages, and the whole structure resembles directories in a file system.
+
+In general, packages have many advantages. They allow us to:
+
+group related classes together, which makes it easier to figure out where a certain class is;
+avoid the conflict of class names;
+control access to classes and members together with access modifiers (you'll learn about this in another topic).
+
+According to the naming convention, package names are always lowercase, for example:
+
+model
+collection
+utils
+
+Here is an example project with a simple tree of packages and classes.
+
+src
+org.company.webapp
+api
+ RestApi.java
+data
+ User.java
+server
+ UserService.java 
+Application.java
+
+Above An example of multi-packages project structure
+
+At the top of the tree, there is a directory src. This is the source root directory. In this tree, the full name of the class User is org.company.webapp.data.User.
+
+You can output the full name using the following code:
+System.out.println(User.class.getName()); // org.company.webapp.data.User
+
+Classes declared inside a package have a special keyword package at the top of the file.
+
+package org.company.webapp.data;
+ 
+public class User {
+}
+ 
+Avoiding the conflict of class names
+When you use external libraries two classes may have the same name. Packages allow us to avoid the conflict of class names because the full class name includes the name of the package. So even if two classes from different packages have the same name, their full names will be different. That is, of course, if there were no conflicts between the package names.
+
+To avoid creating packages with the same names as other public packages it is generally recommended to start your package hierarchy with the reverse domain name of your company (or another organization). For example:
+
+org.company
+org.hyperskill
+net.labs
+
+Importing classes
+If two classes are located in the same package using one class inside the other is no problem. If it is not the case and the classes are in different packages, you need to write an import statement to use one class inside the other. The import statement is defined by the keyword import.
+
+Here is an example. We have two public classes in different packages:
+
+org.hyperskill.java.packages.theory.p1.A
+org.hyperskill.java.packages.theory.p2.B
+
+To use class B inside class A we should make an import statement.
+
+package org.hyperskill.java.packages.theory.p1;  // current package
+ 
+import org.hyperskill.java.packages.theory.p2.B; // it's required to make the import
+ 
+public class A {
+ 
+    public static void method() {
+ 
+        B b = new B();
+    }
+}
+
+The package declaration and import statements are optional. If both of them are present, the package must come before all imports! Otherwise, we get compile-error.
+
+It is also possible to import all classes from the package. To do this we need to write * in the import statement instead of a particular class name.
+import org.hyperskill.java.packages.theory.p3.*; // import all classes from the package
+
+Don't do this too often. In some cases, this is considered a bad practice and can break the compatibility of your program with new versions of Java. Here is an interesting discussion about such statements.
+https://stackoverflow.com/questions/147454/why-using-a-wild-card-with-a-java-import-statement-bad
+
+If two classes belong to the same package, you don't need to import them to each other.
+
+There is a way to use a class from another package without the import statement. In this case, you should write the full class name (including full packages path) instead of the name of the class itself (short name). This is how we would use the Scanner without explicitly importing it first:
+
+java.util.Scanner scanner = new java.util.Scanner(System.in);
+java.util.Date now = new java.util.Date();
+
+Let's polish the information about access to classes inside the package with the following example:
+
+package country
+	class Republic
+	package state
+		class City
+		class Area
+	package teritory
+		class Urban
+		class Rural
+
+Class City and class Area are located in the same subpackage state, so you can use one class inside the other with a short name. The same thing is about class Urban and class Rural in the subpackage territory.
+
+If you want to use any class of a subpackage territory inside the class of a subpackage state or vice versa, you need to write the full name of this class, import the class, or import the whole subpackage. Moreover, if you want to use classes from subpackages state or territory inside the class Republic from package country or vice versa, you also need to write a full name or import the class. This should be done even if these packages are in the same root package (here it is a package country).
+
+Importing standard classes
+There is no difference between importing standard or custom classes.
+
+For example, many Java developers use java.util.Scanner to work with the standard input/output. In their programs, they do the following import:
+
+import java.util.Scanner;
+After this, we can create an instance of the Scanner like in the examples above and use it in our programs.
+
+Even though we would need to import most of the packages, there is a Java package that is always automatically imported. It's java.lang. This package contains many widely used classes, such as String, System, Long, Integer, NullPointerException and others.
+
+Static imports
+We can also import static members (methods and fields) of a class inside another class. If we write * in the import statement, we then don't need to write the imported class name before invoking static methods or reading static fields.
+
+Here is an example of the static import of the class Arrays which contains a lot of useful methods for processing arrays.
+
+package org.hyperskill.java.packages.theory;
+ 
+import static java.util.Arrays.*; // instead of the statement "import java.util.Arrays;"
+ 
+public class Main {
+ 
+    public static void main(String[] args) {
+        int[] numbers = { 10, 4, 5, 47, 5, 12 }; // an array
+ 
+        sort(numbers); // instead of writing Arrays.sort(...)
+ 
+        int[] copy = copyOf(numbers, numbers.length); // instead of writing Arrays.copyOf(...)
+    }
+}
+
+Default package
+If we do not write a package statement before defining our class, it will be placed inside the default package. This package has a big disadvantage — classes located here can't be imported to classes located inside named packages.
+
+The following class cannot be used in class located inside packages since there is no package declaration.
+
+// no package declaration
+ 
+public class Person {
+    String firstName;
+    String lastName;
+}
+
+Do not use the default package for the real applications. It is perfectly fine for simple, educational applications, like "Hello world", but more complex projects will be better in named packages.
+
+Summary
+Packages are a very useful tool for OOP projects. Packages allow us to structure the source code better, and they make it more maintainable. That is very important for big projects that can consist of thousand classes.
+
+Packages are also very helpful for avoiding the conflict of class names because the full class name includes the path of the whole package. If we are careful with the naming of the package itself, there should be no conflicts!
+
+Another thing to remember is that packages affect the visibility of classes and class members to each other. Here we should remember about imports, static members and the default package.
+
+Creating packages even for small applications is a great practice for future grand programs!
+Exercises
+>>Which of the following is a correct statement about the default packages in Java?
+Ans: Import statement can't import a class from the default package into a java file inside a named package.
+
+>>Package  Which classes are accessible
+You have the following classes:
+org.demo.A
+org.demo.B
+org.demo.mypackage1.C
+org.demo.mypackage2.D
+Select all classes that are accessible in the class org.demo.A by their short names without writing any imports.
+
+ Select one or more options from the list
+Ans: java.lang.String
+	 org.demo.A 
+	 org.demo.B
+
+Package  Binary search
+The class Arrays includes a lot of useful methods for processing arrays. One of them is the binarySearch method. It allows you to quickly find the index of an element in the given ordered array. You just need to pass the given parameters in the same order to this method.
+
+In this quiz, you need to call this method from the Arrays class without using an import statement.
+
+Do not use your own implementation of the searching method, it may not work with prepared tests.
+
+Sample Input 1:
+
+0 1 2 3 4 5 6 7 8 9
+5
+Sample Output 1:
+
+5
+	 
+Ans:
+import static java.util.Arrays.*;
+
+class BinarySearch {
+    /**
+     * @param nums ordered sequence of integers
+     * @param key  an element for searching
+     * @return index of key or a negative value
+     */
+    public static int callBinarySearch(int[] nums, int key) {
+        // write your code here
+        return binarySearch(nums, key);
+    }
+}		
+
+Package  Sorting arrays
+The class Arrays provides a number of useful methods for processing arrays. Among them, there's a commonly used one called sort. It allows you to sort any array (string array, integer array, or even object array ). It accepts one argument: the array itself. It modifies array, returning nothing.
+
+In this task, you need to call this method from the Arrays class without using an import statement.
+
+Sample Input 1:
+
+y d b u t f m h x q
+Sample Output 1:
+
+b d f h m q t u x y
+
+Ans:
+class ArraySorting {
+    /**
+     * @param array unordered sequence of strings
+     * @return ordered array of strings
+     */
+    public static String[] sortArray(String[] array) {
+        // write your code here
+        java.util.Arrays.sort(array);
+        return array;
+    }
+}
+
+Package  Creating instances
+Packages allow you access constructors as well as static methods.
+
+Now you're working with the application that multiplies provided number by 200. There' a special class that is used for operating on large numbers called BigInteger.
+
+In this task, you will need to access this class without importing it. Its constructor accepts only one argument: string with the number (for example, "1264"). It is located in java.math package.
+
+You need to create an instance of this class, with the number given in method, and return it.
+
+The program will then multiply it, you don't need to perform multiplication.
+
+Sample Input 1:
+49225
+Sample Output 1:
+
+49225 multiplied by 200 is 9845000
+
+Ans:
+class BigIntegerConverter {
+
+    /**
+     * @param number string representing the number
+     * @return BigInteger instance
+     */
+    public static Number getBigInteger(String number) {
+        return new java.math.BigInteger(number); // create BigIntegere instance here
+    }
+}
+
+Theory: Objects
+A typical object-oriented program consists of a set of interacting objects. Each object has its own state separated from others. Each object is an instance of a particular class (type) that defines common properties and possible behavior for its objects.
+All classes from the standard library (String, Date) and classes defined by programmers are reference types which means that variables of these types store addresses where the actual objects are located. In this regard, the comparison and assignment operations work with objects differently than with primitive types.
+Creating objects
+The keyword new creates an object of a particular class. Here we create a standard string and assign it to the variable str:
+
+String str = new String("hello");		
+The variable str stores a reference to the object "hello" located somewhere in the heap memory.
+
+In the same way, we can create an object of any class we know.
+
+Here is a class that describes a patient in a hospital information system:
+
+class Patient {
+    String name;
+    int age;
+}
+Here is an instance of this class:
+
+Patient patient = new Patient();
+Despite the fact that String is a standard class and Patient is our own class, both classes are regular reference types. However, there is a big difference between those classes and we will discuss it below.
+
+There is an important concept in programming called immutability. Immutability means that an object always stores the same values. If we need to modify these values, we should create a new object. The common example is the standard String class. Strings are immutable objects so all string operations produce a new string. Immutable types allow you to write programs with fewer errors.
+
+The class Patient is not immutable because it is possible to change any field of an object.
+
+Patient patient = new Patient();
+ 
+patient.name = "Mary";
+patient.name = "Alice";
+In the following topics, we will look at the existing immutable classes as well as learn how to create new ones and when to use them.
+
+Sharing references
+More than one variable can refer to the same object.
+
+Patient patient = new Patient();
+ 
+patient.name = "Mary";
+patient.age = 24;
+ 
+System.out.println(patient.name + " " + patient.age); // Mary 24
+ 
+Patient p = patient;
+ 
+System.out.println(p.name + " " + p.age); // Mary 24
+
+It is important to understand that two variables refer to the same data in memory rather than two independent copies. Since our class is mutable, we can modify the object using both references.
+
+patient.age = 25;
+System.out.println(p.age); // 25
+
+Nullability
+As for any reference types, a variable of a class-type can be null which means it is not initialized yet.
+
+Patient patient = null;
+This is a common feature in Java available for classes since they are reference types.
+
+Conclusion
+By now, not only we have already worked with some classes from the standard library but also learned how Java allows us to create our own classes. In this topic, we've discussed that the nature of custom classes' objects and standard library ones are based on the same principles.
+
+Keep in mind, that classes defined by programmers are reference types. When objects are created by the new operator it returns reference in memory where the created objects are located. By this reference, we can get access to its fields and change them. Several variables can refer to the same object through a reference. It is also possible to create two independent objects with the same field's content. It's important to understand that references to such objects are different. However, not all objects allow changing its state after creation. Such a feature is called immutability.
+
+Exercises:
+>>Objects  What is the value of a field
+
+Suppose you have the following class in your program:
+
+class Hotel {
+    String name;
+    String address;
+    int rating;
+}
+There are several objects of the class:
+
+Hotel h1 = new Hotel();
+Hotel h2 = new Hotel();
+Hotel h3 = h2;
+ 
+h2.rating = 9;
+h3.rating = 8;
+h1.rating = 7;
+What is the value of h2.rating after executing the code above?
+
+Ans:
+8
+
+>>Objects  Army
+You decide to recall the happy days of your childhood and play Heroes. Of course, you need the army.
+
+Your task is to create objects: 5 Unit, 3 Knight, 1 General, 1 Doctor.
+
+Don't forget to give them names!
+
+class Unit {    
+    String nameUnit;
+    
+    public Unit(String name){
+        nameUnit = name;
+    }
+}
+ 
+class Knight {
+    String nameKnight;
+ 
+    public Knight(String name){
+        nameKnight = name;
+    }
+}
+ 
+class General {
+    String nameGeneral;
+    
+    public General(String name){
+        nameGeneral = name;
+    }
+}
+ 
+class Doctor {
+    String nameDoctor;
+    
+    public Doctor(String name){
+        nameDoctor = name;
+    }
+}
+
+Ans:
+class Army {
+
+    public static void createArmy() {
+        // Implement this method
+        //5 units
+        Unit unit1 = new Unit("U1");
+        Unit unit2 = new Unit("U2");
+        Unit unit3 = new Unit("U3");
+        Unit unit4 = new Unit("U4");
+        Unit unit5 = new Unit("U5");
+        
+        //3 Knight
+        Knight knight1 = new Knight("K1");
+        Knight knight2 = new Knight("K2");
+        Knight knight3 = new Knight("K3");
+        
+        //1 General
+        General general = new General("G1");
+        
+        //1 Doctor
+        Doctor doctor = new Doctor("D1"); 
+    }
+
+
+    // Don't change the code below
+    static class Unit {
+        static String nameUnit;
+        static int countUnit;
+
+        public Unit(String name) {
+            countUnit++;
+            nameUnit = name;
+
+        }
+    }
+
+    static class Knight {
+        static String nameKnight;
+        static int countKnight;
+
+        public Knight(String name) {
+            countKnight++;
+            nameKnight = name;
+
+        }
+    }
+
+    static class General {
+        static String nameGeneral;
+        static int countGeneral;
+
+        public General(String name) {
+            countGeneral++;
+            nameGeneral = name;
+
+        }
+    }
+
+    static class Doctor {
+        static String nameDoctor;
+        static int countDoctor;
+
+        public Doctor(String name) {
+            countDoctor++;
+            nameDoctor = name;
+
+        }
+    }
+
+    public static void main(String[] args) {
+        createArmy();
+        System.out.println(Unit.countUnit);
+        System.out.println(Knight.countKnight);
+        System.out.println(General.countGeneral);
+        System.out.println(Doctor.countDoctor);
+    }
+
+}
+>>Objects  Preparing full name
+Implement a function for preparing full name. The function takes two string arguments: firstName and lastName. You need to concat them together with a space in the middle.
+
+If an argument is null then do not add it and a space to the full name.
+
+Sample Input 1:
+
+Joseph
+Brown
+Sample Output 1:
+
+Joseph Brown
+Sample Input 2:
+
+Joseph
+null
+Sample Output 2:
+
+Joseph
+
+
+Ans:
+import java.util.Scanner;
+
+public class Main {
+
+    public static String prepareFullName(String firstName, String lastName) {
+        // write your code here
+        return (firstName == null ? "" : firstName.concat(" ")).concat(lastName == null ? "" : lastName);
+    }
+
+    /* Do not change code below */
+    public static void main(String[] args) {
+        final Scanner scanner = new Scanner(System.in);
+
+        String firstName = scanner.nextLine();
+        firstName = "null".equals(firstName) ? null : firstName;
+
+        String lastName = scanner.nextLine();
+        lastName = "null".equals(lastName) ? null : lastName;
+
+        System.out.println(prepareFullName(firstName, lastName));
+    }
+}
+
+
+Daily Challenge
+Enum  Robot control
+
+Wow! This problem is kind of tricky. If you're ready to put your thinking cap on, brace yourself and good luck! Otherwise, you can skip it by now and return any time later
+There is a robot in the game field. The position of the robot in this field is described by two integer coordinates: X and Y. The X axis is oriented from left to right, the Y axis — from bottom to top.
+
+At the initial moment, the robot is in some coordinate on the field. It's also known where the robot looks: up, down, to the right or to the left. The initial position of the robot and its direction can have any values. You need to bring the robot to the destination point of the game field.
+
+A robot is described by the Robot class. You can use the following methods of this class (with unknown implementation):
+
+public class Robot {
+ 
+    public Direction getDirection() {
+        // current direction
+    }
+ 
+    public int getX() {
+        // current X coordinate
+    }
+ 
+    public int getY() {
+        // current Y o
+    }
+ 
+    public void turnLeft() {
+        // rotate the robot 90 degrees counterclockwise
+    }
+ 
+    public void turnRight() {
+        // rotate the robot 90 degrees clockwise
+    }
+ 
+    public void stepForward() {
+        // take one step in the current direction
+        // x or y coordinate will be changed by 1
+    }
+}
+The direction of the robot is an enumeration:
+
+public enum Direction {
+    UP,
+    DOWN,
+    LEFT,
+    RIGHT
+}
+It looks like the picture below:
+
+
+
+Example
+
+The following values are passed to the method: toX == 3, toY == 0.
+The initial state of this robot: robot.getX() == 0, robot.getY() == 0, robot.getDirection() == Direction.UP.
+To bring the robot to the destination point (3, 0), the method should call the following methods:
+
+robot.turnRight();
+robot.stepForward();
+robot.stepForward();
+robot.stepForward();
+Another Example
+
+The following target values are passed to the method: toX == 0, toY == -1.
+The initial state of this robot: robot.getX() == 1, robot.getY() == 1, robot.getDirection() == Direction.RIGHT.
+To bring the robot to the destination point (0, -1), the method should call the following methods:
+
+robot.turnRight();
+robot.turnRight();
+robot.stepForward();
+robot.turnLeft();
+robot.stepForward();
+robot.stepForward();
+Try to crack this problem!
+
+Hint
+
+Pay attention to the loops: sometimes they tend to become infinite...
+
+class Move {
+    public static void moveRobot(Robot robot, int toX, int toY) {
+        //robot.stepForward(); // your implementation here
+        //get current coordinates of robot
+        int ctX = robot.getX();
+        int ctY = robot.getY();
+        
+        Direction direction = robot.getDirection();
+        String directionName = direction.name();
+        
+        String reqdDirection = "";
+        
+        int distX = ctX - toX;
+        int distY = ctY - toY;
+
+        //move X        
+        if (distX < 0) {
+            distX = distX * -1;
+            reqdDirection = "RIGHT";
+        } else {
+            reqdDirection = "LEFT";
+        }
+        
+       while (!robot.getDirection().name().equals(reqdDirection)) {
+            robot.turnLeft();
+        }
+        
+        for (int iX = 0; iX < distX; iX++) {
+            robot.stepForward();
+        }
+        
+        
+        //first will move x
+        //if ctX is bigger then toX then direction to move should be left
+        //if ctX is smaller then toX then direction to move should be right  
+        
+        /*if(ctX > toX) {
+            switch(directionName) {
+                case "UP":
+                    robot.turnLeft();                   
+                    break;
+                case "DOWN":
+                    robot.turnRight();
+                    break;
+                case "RIGHT":
+                    robot.turnRight();
+                    robot.turnRight();
+                    break;    
+                case "LEFT":
+                    break;    
+            }
+        } else if(ctX < toX) {
+            switch(directionName) {
+                case "UP":
+                    robot.turnRight();
+                    break;
+                case "DOWN":
+                    robot.turnRight();
+                    break;
+                case "RIGHT":
+                    break;                    
+                case "LEFT":
+                    robot.turnLeft();
+                    robot.turnLeft();
+                    break;    
+            }
+        }*/
+        
+        
+        
+       
+        
+        //Now will move x
+        //if ctY is bigger then toY then direction to move should be down
+        //if ctY is smaller then toY then direction to move should be UP 
+        /*if(ctY > toY) {
+            switch(directionName) {
+                case "UP":
+                    robot.turnLeft();
+                    robot.turnLeft();                    
+                    break;
+                case "DOWN":
+                    break;
+                case "RIGHT":
+                    robot.turnRight();
+                    break;    
+                case "LEFT":
+                    robot.turnLeft();
+                    break;    
+            }
+        } else if(ctY < toY) {
+            switch(directionName) {
+                case "UP":
+                    break;
+                case "DOWN":
+                    robot.turnRight();
+                    robot.turnRight();
+                    break;
+                case "RIGHT":
+                    robot.turnLeft();
+                    break;                    
+                case "LEFT":
+                    robot.turnRight();
+                    break;    
+            }
+        }*/
+        
+        //move Y
+        if (distY < 0) {
+            distY = distY * -1;
+            reqdDirection = "UP";
+        } else {
+            reqdDirection = "DOWN";
+        }     
+        
+        while (!robot.getDirection().name().equals(reqdDirection)) {
+            robot.turnLeft();
+        }
+        
+        for (int iY = 0; iY < distY; iY++) {
+            robot.stepForward();
+        }
+        
+        
+        
+    }
+}
+
+//Don't change code below
+
+enum Direction {
+    UP(0, 1),
+    DOWN(0, -1),
+    LEFT(-1, 0),
+    RIGHT(1, 0);
+
+    private final int dx;
+    private final int dy;
+
+    Direction(int dx, int dy) {
+        this.dx = dx;
+        this.dy = dy;
+    }
+
+    public Direction turnLeft() {
+        switch (this) {
+            case UP:
+                return LEFT;
+            case DOWN:
+                return RIGHT;
+            case LEFT:
+                return DOWN;
+            case RIGHT:
+                return UP;
+            default:
+                throw new IllegalStateException();
+        }
+    }
+
+    public Direction turnRight() {
+        switch (this) {
+            case UP:
+                return RIGHT;
+            case DOWN:
+                return LEFT;
+            case LEFT:
+                return UP;
+            case RIGHT:
+                return DOWN;
+            default:
+                throw new IllegalStateException();
+        }
+    }
+
+    public int dx() {
+        return dx;
+    }
+
+    public int dy() {
+        return dy;
+    }
+}
+
+class Robot {
+    private int x;
+    private int y;
+    private Direction direction;
+
+    public Robot(int x, int y, Direction direction) {
+        this.x = x;
+        this.y = y;
+        this.direction = direction;
+    }
+
+    public void turnLeft() {
+        direction = direction.turnLeft();
+    }
+
+    public void turnRight() {
+        direction = direction.turnRight();
+    }
+
+    public void stepForward() {
+        x += direction.dx();
+        y += direction.dy();
+    }
+
+    public Direction getDirection() {
+        return direction;
+    }
+
+    public int getX() {
+        return x;
+    }
+
+    public int getY() {
+        return y;
+    }
+}
+
+
+Theory: Access modifiers
+You've probably seen the following piece of code:
+
+public static void main(String[] args) { 
+    // some code goes here
+}
+Why is the word "public" even there? As you could probably guess, it means that the main(...) method is available for everyone. The word public here is an access modifier.
+
+Access modifier is a special keyword that specifies who is allowed to use your code or a special part of it. It can be placed in front of any field, method or entire class.
+
+So, you already know at least one of the access modifiers! The others are: package-private, protected, and private. Why do we need them? Let's find out.
+
+OK, so why should I use them?
+There are two main reasons to take access under control: clarity and safety of code.
+Code clarity. Imagine your code is a complicated engine of a washing machine. There are some available functions – for example, choosing a washing program or starting a washing process.
+
+What can we do to help the user quickly figure out how to wash their clothes? We can cover the engine with the body and add some buttons for choosing a washing mode and starting the process. The user has no need to know what is going on inside the machine’s body; the buttons to get the result are more than enough.
+
+That’s how access control helps in code – you can “hide” the engine from the user by restricting access and simply provide them with the public “buttons”.
+
+Code safety. Now imagine you have developed a rather useful library that is used by other developers. One day some John Doe wants to use your code’s functionality in his project, but the problem is that he needs to change one variable in one of your classes. If it is public, nothing can stop him from doing that in his code before using method A from the library.
+
+What can happen if the variable is used somewhere in method B? Probably the B method would start to act unpredictably. So, protecting important parts of your code is a guarantee that it will be used as an unmodifiable part and its behavior will be the exact one you have developed for it.
+
+Public and package-private classes
+Now let’s see how we can set restrictions to different parts of the code. A top-level class (not an inner one, not a nested one) can have one of two following modifiers:
+package-private (default, no explicit modifier): visible only for classes from the same package;
+
+public: visible to all classes everywhere.
+
+Here is a class inside the package org.hyperskill.java.packages.theory.p1. with default package-private access:
+
+package org.hyperskill.java.packages.theory.p1;
+ 
+class PackagePrivateClass{
+ 
+}
+This class can be used only by other classes from the same package. It's not even visible for classes from any other package including:
+
+org.hyperskill
+ 
+org.hyperskill.java.packages.theory
+ 
+default package
+
+Note the first two examples – if the class is package-private in package a.b, it is still unavailable from package a.c and package a itself.
+
+Here is a public class inside the package org.hyperskill.java.packages.theory.p2
+
+package org.hyperskill.java.packages.theory.p2;
+ 
+public class PublicClass {
+ 
+}
+This class has no access restrictions, it is visible to all classes and can be used everywhere including:
+
+org.hyperskill
+ 
+org.hyperskill.java.packages.theory
+ 
+org.hyperskill.java.packages.theory.p1
+ 
+default package
+
+The common way of using top-level class modifiers is:
+
+make the classes, containing exact methods for the users (the “buttons”), public;
+make all other classes with low-level logic methods, used by public ones, package-private (cover the engine with the body).
+
+Getter and setter methods are used to protect and hide your data when creating classes. A getter method returns the value of a field while a setter method sets or updates the value. We will discuss the main features of getter and setter methods later in the topic related to these terms.
+
+Remember: everything that’s not meant to be used/changed by classes from other packages, should not be public.
+
+Private members
+A class member (a field or a method, e. g. class constructor) has more options to choose from: private, package-private, protected and public. As you can see, there are two additional modifiers here. Let's consider member modifiers in more detail.
+
+Fields are often declared private to control access to them from any other class. In some cases, these fields are only used internally in the class and there is no way to change and even access them from any other class. In other cases, it can be done via accessor methods (e.g. getters and setters).
+
+Private methods are used to hide the internal low-level logic implementation from the rest of the code and make public methods more brief and readable.
+
+Here is the class Counter with the private field current. This field can be read only with the method getCurrent() , a getter-method, and changed with the inc() method. The last one is not exactly a setter-method, because it doesn't manually set a value to a current variable, just incrementing it.
+
+public class Counter {
+   private long current = 0;
+ 
+   public long getCurrent() {
+       return current;
+   }
+ 
+ 
+   public long inc() {
+       inc(1L);
+       return current;
+   }
+ 
+ 
+   private void inc(long val) {
+       current += val;
+   }
+}
+
+Sometimes, a private class constructor is required. This type of constructor can only be used inside the class, e.g. from another constructor, which can be public or private too, or from the class methods. -Singleton Design Pattern
+
+Package-private members
+A package-private access modifier does not require any keyword. If a field, a method or a constructor has this modifier then it can be read or changed from any class inside the same package.
+
+Let's see an example. Here are two classes in the same package: SomeClass and AnotherClass.
+
+The class SomeClass has a package-private field and constructor. The instance of the SomeClass can be created inside a method of AnotherClass, and a field can also be accessed by AnotherClass and its members because they have the same package.
+
+public class SomeClass {
+   int field;
+ 
+   SomeClass(int field) {
+       this.field = field;
+   }
+}
+ 
+public class AnotherClass {
+   AnotherClass() {
+       SomeClass clazz = new SomeClass(100);
+       clazz.field = 540;
+   }
+}
+
+Protected and public members
+Disclaimer: these two modifiers you will learn to use later!
+
+If a class member has the protected access modifier, it can be accessed from classes inside the same package and all subclasses of this class (including the ones in other packages). For now, it is important to remember, that protected option is less restricting than package-private as it allows some classes from other packages access to the code member.
+
+Public access modifier means that there is no restriction on using field, method or class. It's often used for constructors, methods representing the class API but not commonly used with fields.
+
+Here are common ways to understand which access modifier to choose. It is not the ultimate algorithm, because the inheritance and subclasses topics have not been covered yet, but it can help you understand the main use cases of the modifiers.
+
+So, let's revise the names of access modifiers (from most to least limiting):
+
+private — available only inside a class;
+package-private (also known as default, implicit) — available for all classes in the same package;
+protected — available for classes in the same package and for subclasses (will be covered later);
+public — available for all classes everywhere.
+
+The table illustrates the level of access provided by the access modifiers: the class always has access to its members and so on. Note that by a subclass here we mean only a subclass of this class used in another package. We will learn inheritance and subclasses later.
+
+Remember, that only public or default (no keywords) modifiers may be used when declaring classes. All four of them can be applied to class members: fields, methods, etc.
+
+As a conclusion, there is a bit of advice:
+
+use the most restrictive access level that makes sense for a particular member. Don't make all members public.
+
+Exercises:
+>>Access modifiers  Accessing class's fields
+In Java, what is a common way (but not always) to get access to class's fields?
+Ans:
+use special methods for accessing fields — getters
+
+>>Access modifiers  Statements
+You have a class with one private constructor:
+package org.demo.example;
+ 
+public class MyClass {
+    
+    private MyClass() { }
+    
+    private void method1() { }
+    
+    public void method2() { }
+}
+
+Select all correct statements.
+Ans:
+You cannot create instances of MyClass using the keyword new inside classes that belong to other packages.
+You can create instances of MyClass using the keyword new inside the method2
+
+
+>>Access modifiers  Select correct lines
+You are given two classes:
+
+org.demo.A
+org.demo.B
+class A {
+    
+    private int a;
+    
+    public void invokeB() { 
+        B objB = new B(); // (1)
+        int b = objB.b;   // (2)
+        int c = objB.c;   // (3)
+    }
+}
+ 
+public class B {
+ 
+    private int b;
+    int c;
+    
+    public void invokeA() {
+        A objA = new A(); // (4)
+        int a = objA.a;   // (5)
+    }
+}
+
+Select all correct lines.
+
+Ans:
+1,3,4
+
+>>Access modifiers  Suitable modifiers
+You have declared a class SomeClass in the package org.hyperskill.java.
+
+package org.hyperskill.java;
+ 
+class SomeClass {
+ 
+    ??? long longVal;
+}
+There is another class Demo in the same package. In a method of this class, you have an instance of SomeClass.
+
+Which of the listed access modifiers can be written instead of ??? to have an ability to set a value to the field longVal of the instance?
+ Select one or more options from the list
+Ans:
+no modifier (empty)
+
+protected
+
+public
+
+
+Theory: Getters and setters
+Data encapsulation
+According to the data encapsulation principle, the fields of a class are hidden from being directly accessed from other classes. The fields can be accessed only through the methods of that particular class.
+
+To access hidden fields programmers write special types of methods: getters and setters. Getters can only read fields, setters can only write (modify) the fields. Both types of methods should be public.
+
+Using these methods gives us some advantages:
+
+the fields of a class can be made read-only, write-only or both;
+a class can have total control over what values are stored in the fields;
+users of a class don't know how the class stores its data and don't depend on the fields.
+
+Getters and setters
+Java doesn't provide any special keywords for getter and setter methods. Their main difference from the other methods is their names.
+According to the JavaBeans Convention:
+
+https://docstore.mik.ua/orelly/java-ent/jnut/ch06_02.htm
+getters start with get, followed by the variable name, with the first letter of the variable name capitalized;
+setters start with set, followed by the variable name, with the first letter of the variable name capitalized.
+
+This convention applies to any types except boolean. A getter for a boolean field start with is, followed by the variable name.
+Example 1. The class Account has four fields: id, code, balance and enabled. Each field has a keyword private to hide the field from direct access from other classes. Also, the class has public getters and setters for accessing fields through these methods.
+
+class Account {
+ 
+    private long id;
+    private String code;
+    private long balance;
+    private boolean enabled;
+ 
+    public long getId() {
+        return id;
+    }
+ 
+    public void setId(long id) {
+        this.id = id;
+    }
+ 
+    public String getCode() {
+        return code;
+    }
+ 
+    public void setCode(String code) {
+        this.code = code;
+    }
+ 
+    public long getBalance() {
+        return balance;
+    }
+ 
+    public void setBalance(long balance) {
+        this.balance = balance;
+    }
+ 
+    public boolean isEnabled() {
+        return enabled;
+    }
+ 
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
+    }
+}
+
+Here you can see the different getters and setters for the class Account. Just as the convention states, the boolean field enabled has a different getter name: it starts with the word is instead of get.
+
+Let's create an instance of the class and fill the fields, then read values from the fields and output them.
+
+Account account = new Account();
+ 
+account.setId(1000);
+account.setCode("62968503812");
+account.setBalance(100_000_000);
+account.setEnabled(true);
+ 
+System.out.println(account.getId());      // 1000
+System.out.println(account.getCode());    // 62968503812
+System.out.println(account.getBalance()); // 100000000
+System.out.println(account.isEnabled());  // true
+
+Sometimes, getters or setters can contain a more sophisticated logic. For example, getters may return non-stored values (calculated at runtime), or setters may also in some cases modify the value of another field according to changes. But usually, getters and setters have a minimum of programming logic.
+
+Sometimes, getters or setters can contain a more sophisticated logic. For example, getters may return non-stored values (calculated at runtime), or setters may also in some cases modify the value of another field according to changes. But usually, getters and setters have a minimum of programming logic.
+
+Example 2. In the following class, the setter setName doesn't change the current value if the passed value is null.
+
+class Patient {
+ 
+    private String name;
+ 
+    public Patient(String name) {
+        this.name = name;
+    }
+ 
+    public String getName() {
+        return this.name;
+    }
+    
+    public void setName(String name) {
+        if (name != null) {
+            this.name = name;
+        }
+    }
+}
+
+Conclusion
+To restrict access to fields from external code make them private and write suitable getters/setters to read/change only the fields you need. Do not forget to make use of the naming convention when writing them.
+
+Note, modern IDEs (such as IntelliJ IDEA) can generate getters and setters automatically based on class fields.
+
+Exercises:
+>>Getters and setters  The name of setter
+What is the name of the setter for a field named age?
+Ans:
+setAge
+
+>>Getters and setters  Choose a pair of getter and setter
+Choose a pair of getter and setter names for the boolean field completed according to the convention.
+Ans:
+setCompleted
+isCompleted
+
+>>Getters and setters  Complex
+Here's a class named Complex with two double fields, real and imaginary.
+
+Write getters and setters for both fields.
+
+Ans:
+class Complex {
+
+    private double real;
+    private double imaginary;
+    
+    public void setReal(double real) {
+        this.real = real;
+    }
+    
+    public double getReal() {
+        return real;
+    }
+    
+    public void setImaginary(double imaginary) {
+        this.imaginary = imaginary;
+    }
+    
+    public double getImaginary() {
+        return imaginary;
+    }
+}
+
+
+>>Getters and setters  Account
+You are given a class named Account. It has three fields: a long field balance, a string field ownerName, and a boolean flag locked.
+
+Write getters and setters for all fields.
+
+Ans:
+class Account {
+
+    private long balance;
+    private String ownerName;
+    private boolean locked;
+    
+    public void setBalance(long balance) {
+        this.balance = balance;
+    }
+    
+    public long getBalance() {
+        return balance;
+    } 
+    
+    public void setOwnerName(String ownerName) {
+        this.ownerName = ownerName;
+    }
+    
+    public String getOwnerName() {
+        return ownerName;
+    }
+    
+    public void setLocked(boolean locked) {
+        this.locked = locked;
+    }
+    
+    public boolean isLocked() {
+        return locked;
+    }
+}
+
+
+>>Getters and setters  Getting the fullname
+Here is the User class with two fields: firstName and lastName.
+
+Implement two null-safety setters and one calculated getter in the following ways:
+
+both setters should accept and set a value if it is not null, otherwise, empty string "";
+the getter should return the full name of the user by concatenating firstName and lastName using a single space between them. If one of the parts was not set, the getter should return another part without additional spaces. If both parts are empty, the getter should return the word "Unknown".
+There are two examples below:
+User tim = new User();
+tim.setFirstName("Tim");
+tim.setLastName("Towler");
+System.out.println(tim.getFullName()); // Tim Towler
+ 
+User katie = new User();
+katie.setFirstName("Katie");
+katie.setLastName(null);
+System.out.println(katie.getFullName()); // Katie (without additional spaces)
+
+Ans:
+class User {
+    private String firstName;
+    private String lastName;
+
+    public User() {
+        this.firstName = "";
+        this.lastName = "";
+    }
+
+    public void setFirstName(String firstName) {
+        // write your code here
+        if (firstName == null) {
+            this.firstName = "";
+        } else {
+            this.firstName = firstName;  
+        } 
+    }
+
+    public void setLastName(String lastName) {
+        // write your code here
+        if (lastName == null) {
+            this.lastName = "";   
+        } else {
+            this.lastName = lastName;
+        }
+    }
+
+    public String getFullName() {
+        String fullName = "";
+        if (firstName.isEmpty() && lastName.isEmpty()) {
+            fullName = "Unknown";
+        } else if (firstName.isEmpty() && !lastName.isEmpty()) {
+            fullName = lastName;
+        } else if (!firstName.isEmpty() && lastName.isEmpty()) {
+            fullName = firstName;
+        } else {
+            fullName = firstName + " " + lastName;
+        }
+        return fullName; // write your code here
+    }
+}
+
+
+====================================================================================
+CodeNotes
+1. Stack overflow
+2. Source Forge
+3. Code guru
+4. Code project
+5. Devx
+6. Planet Source code
+7. GNU free software directory
+8. Google open source
+9. Top react open source project
+10. Code pen
+11. Coderbyte
+12. Codewars
+13. Cody fights
+14. Codin game
+15. Top Coder
+16. Hacker rank
+17. Leetcode
+18. Codechef
+19. Geeks for geeks
+20. Code forces
+
+Coderbyte
+https://www.coderbyte.com/
+Codewars
+https://www.codewars.com/
+CodeFights
+https://codefights.com/
+CodinGame
+https://www.codingame.com/start
+TopCoder
+https://www.topcoder.com/challenges/
+HackerRank
+https://www.hackerrank.com/
+LeetCode
+https://leetcode.com/
+CodeChef
+https://www.codechef.com/
+GeeksforGeeks
+https://www.geeksforgeeks.org/
+Codeforces
+http://codeforces.com/
+
+https://medium.com/coderbyte/the-10-best-coding-challenge-websites-for-2018-12b57645b654
+
+
+==============================================================================================
+Notes-1
+String str1 = "aaabbcccdaa";
+String str2 = " ";
+ 
+for (int i = 0; i < str1.length(); i++) {
+    char ch = str1.charAt(i);
+    if (ch != str2.charAt(str2.length() - 1)) {
+        str2 += ch;
+    }
+}
+
+
+age = (remainder3 * 70 + remainder5 * 21 + remainder7 * 15) % 105
+Hello! My name is Aid.
+I was created in 2018.
+Please, remind me your name.
+> Max
+What a great name you have, Max!
+Let me guess your age.
+Enter remainders of dividing your age by 3, 5 and 7.
+> 1 2 1
+Your age is 22; that's a good time to start programming!
+
+import java.util.Scanner;
+Scanner scanner = new Scanner(System.in);
+String name = scanner.next();
+ 
+System.out.println("Hello, " + name +"!");
+
+//next() will read only one word nextLine() will read complete line
+
+
+This is a simple
+multiline input
+to read from
+
+
+import java.util.Scanner; 
+ 
+public class Main {
+ 
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);  
+ 
+        String word1 = scanner.next(); // "This"
+        String line1 = scanner.nextLine(); // " is a simple" 
+        String word2 = scanner.next(); // "multiline"
+        String word3 = scanner.next(); // "input,"
+        String line2 = scanner.nextLine(); // "" 
+        
+    }
+}
+
+Write a program that reads four words and outputs them in the same order, each in a new line.
+
+Sample Input 1:
+
+Hello
+Java
+Future programmer
+Sample Output 1:
+
+Hello
+Java
+Future
+programmer
+
+import java.util.Scanner;
+
+class Main {
+    public static void main(String[] args) {
+        // put your code here
+        Scanner scanner = new Scanner(System.in);
+                
+        String word1 = scanner.nextLine();
+        String word2 = scanner.nextLine();
+        String word3 = scanner.next();
+        String word4 = scanner.next();
+        
+        System.out.println(word1);
+        System.out.println(word2);
+        System.out.println(word3);
+        System.out.println(word4);
+        
+    }
+}
+
+import java.util.Scanner;
+ 
+class Main {
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        
+        int a = scanner.nextInt();
+        int b = scanner.nextInt();
+ 
+        int sum = a + b;
+ 
+        System.out.println(sum);
+    }
+}
+
+
+Snail logic
+Similar problem:
+Snail creeps up the vertical pole of height H feets. Per day it goes A feets up, and per night it goes B feets down. In which day the snail will reach the top of the pole?
+Solving equation 1,
+
+n=(Tn-a)/d + 1
+
+n=30–3/1 + 1
+
+n=27+1
+
+n=28
+
+Therefore it will take 28 days
+
+Math. logic with H=20, A=7, B=3 example. We know what it climb at A-B rate per day. We also know what we don't go back at last day. Knowing that, we can say what A*D - B*(D-1) = H, where D is amount of days. Putting numbers to equation we have:
+7*D-3*(D-1) = 20
+7*D-3*D+3 = 20
+4*D = 17
+D = 17/4
+D = 4.25
+
+6d -0*(d-1) = 10
+6d = 10
+
+
+
+10 = 3*d-2*(d-1)
+10 = 3d-2d+2
+
+
+import java.util.Scanner;
+
+class Main {
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        // put your code here
+        int poleHeight = scanner.nextInt();
+        int ascent = scanner.nextInt();
+        int descent = scanner.nextInt();
+        
+        int distanceTravelled = ascent - descent;
+        double intermediateDistance = poleHeight - descent;
+        
+        int days = (int) Math.ceil(intermediateDistance / distanceTravelled);
+         
+        
+        System.out.println(days);
+        
+    }
+}
+
+
+prefix (++n or --n) increases/decreases the value of a variable before it is used;
+postfix (n++ or n--) increases/decreases the value of a variable after it is used.
+
+int a = 4;
+int b = ++a;
+ 
+System.out.println(a); // 5
+System.out.println(b); // 5
+
+
+int a = 4;
+int b = a++;
+ 
+System.out.println(a); // 5
+System.out.println(b); // 4
+
+
+int a = 4;
+System.out.println(a++ + a); // this is 9
+
+
+int a = -1;
+		System.out.println(1 - a++); //2
+
+char ch = '\u0040'; // it represents '@'
+System.out.println(ch); // @
+
+
+char ch = 64;
+System.out.println(ch); // @
+
+char ch = 'b';
+ch += 1; // 'c'
+ch -= 2; // 'a'
+It is also possible adding and subtracting one character to / from another one.
+
+char ch = 'b';
+ch += 'a';
+ch -= 'b';
+System.out.println(ch); // prints 'a' without quotes
+
+char ch = 'A';
+ch += 10;
+System.out.println(ch);   // 'K'
+System.out.println(++ch); // 'L'
+System.out.println(++ch); // 'M'
+System.out.println(--ch); // 'L'
+
+'\n' is the newline character;
+'\t' is the tab character;
+'\r' is the carriage return character;
+'\\' is the backslash character itself;
+'\'' is the single quote mark;
+'\"' is the double quote mark.
+
+System.out.print('\t'); // makes a tab
+System.out.print('a');  // prints 'a'
+System.out.print('\n'); // goes to the new line
+System.out.print('c');  // prints 'c'
+
+The standard library of Java provides a lot of useful methods for processing strings:
+
+isEmpty() returns true if the string is empty, otherwise – false;
+toUpperCase() returns a new string in uppercase;
+toLowerCase() returns a new string in lowercase;
+startsWith(prefix) returns true if the string starts with the given string prefix, otherwise, false;
+endsWith(suffix) returns true if the string ends with the given string suffix, otherwise, false.
+contains(...) returns true if the string contains the given string or character;
+substring(beginIndex, endIndex) returns a substring of the string in the range: beginIndex, endIndex - 1;
+replace(old, new) returns a new string obtained by replacing all occurrences of old with new that can be chars or strings.
+trim() returns a copy of the string obtained by omitting the leading and trailing whitespace. Note that whitespace includes not only space character, but mostly everything that looks empty: tab, carriage return, newline character, etc.
+
+String text = "The simple text string";
+ 
+boolean empty = text.isEmpty(); // false
+ 
+String textInUpperCase = text.toUpperCase(); // "THE SIMPLE TEXT STRING"
+ 
+boolean startsWith = textInUpperCase.startsWith("THE"); // true
+ 
+/* replace all whitespaces with empty strings */
+String noWhitespaces = textInUpperCase.replace(" ", ""); // "THESIMPLETEXTSTRING"
+ 
+String textWithWhitespaces = "\t text with whitespaces   !\n  \t";
+ 
+String trimmedText = textWithWhitespaces.trim(); // "text with whitespaces   !"
+
+String s = null;
+int length = s.length(); // it throws NullPointerException
+
+String s = "ab";
+char c = s.charAt(2); // it throws StringIndexOutOfBoundsException because indexing starts with 0
+
+Two strings can be concatenated using the "+" operator or the concat method. Both approaches lead to the same results.
+
+String firstName = "John";
+String lastName = "Smith";
+ 
+// concatenation using the "+" operator
+String fullName1 = firstName + " " + lastName; // "John Smith"
+ 
+// concatenation using the concat method 
+String fullName2 = firstName.concat(" ").concat(lastName); // "John Smith"
+
+String str = "str" + 10 + false; // the result is "str10false"
+
+In the example above, the order of execution is:
+
+"str" + 10 => "str10"
+"str10" + false = "str10false"
+
+String shortString = "str";
+long number = 100;
+ 
+String result1 = shortString + number + 50; // the result is "str10050"
+String result2 = number + 50 + shortString; // what is the result2?
+The result2 is 150str, because, first, we calculate a sum of number and 50 and then concat it with str. The order of operations is important.
+
+Since String is a reference type you shouldn't compare strings using == or != operators. In this case, only addresses will be compared, but not actual values.
+
+String first = "first";
+String second = "second";
+ 
+String anotherFirst = "first";
+String secondInUpperCase = "SECOND";
+ 
+System.out.println(first.equals(second)); // false, the strings have different values
+System.out.println(first.equals(anotherFirst)); // true, the strings have the same value
+ 
+System.out.println(second.equals(secondInUpperCase)); // false, the strings have different cases
+System.out.println(second.equalsIgnoreCase(secondInUpperCase)); // true, it ignores cases
+
+Hello! My name is Aid.
+I was created in 2018.
+Please, remind me your name.
+> Max​​​​​​​
+What a great name you have, Max!
+Let me guess your age.
+Say me remainders of dividing your age by 3, 5 and 7.
+> 1 2 1
+Your age is 22; that's a good time to start programming!
+Now I will prove to you that I can count to any number you want.
+> 5
+0!
+1!
+2!
+3!
+4!
+5!
+Completed, have a nice day!
+
+NOT is a unary operator that reverses the boolean value. It is denoted as !.
+boolean f = false; // f is false
+boolean t = !f;    // t is true
+
+AND is a binary operator that returns true if both operands are true, otherwise, it is false. It is denoted as &&.
+boolean b1 = false && false; // false
+boolean b2 = false && true;  // false
+boolean b3 = true && false;  // false
+boolean b4 = true && true;   // true
+
+boolean b1 = false || false; // false
+boolean b2 = false || true;  // true
+boolean b3 = true || false;  // true
+boolean b4 = true || true;   // true
+
+XOR (exclusive OR) is a binary operator that returns true if boolean operands have different values, otherwise, it is false.
+boolean b1 = false ^ false; // false
+boolean b2 = false ^ true;  // true
+boolean b3 = true ^ false;  // true
+boolean b4 = true ^ true;   // false
+
+Below are the logical operations sorted in order of decreasing their priorities in expressions: ! (NOT), ^ (XOR), && (AND), || (OR).
+
+boolean b = true && !false; // true, because !false is evaluated first
+
+As an example, let's write a complex boolean expression that determines the possibility of trekking in summer and in other seasons.
+boolean cold = false;
+boolean dry = true;
+boolean summer = false; // suppose now is autumn
+ 
+boolean trekking = dry && (!cold || summer); // true, let's go to trek!
+
+Short-circuiting evaluation
+
+false && ... -> false, since it is not necessary to know what the right-hand side is;
+true || ... -> true, since it is not necessary to know what the right-hand side is.
+
+int one = 1;
+int two = 2;
+int three = 3;
+int four = 4;
+ 
+boolean oneIsOne = one == one; // true
+ 
+boolean res1 = two <= three; // true
+boolean res2 = two != four;  // true
+boolean res3 = two > four;   // false
+boolean res4 = one == three; // false
+
+Relational operators can be used in mixed expressions together with arithmetic operators. In such expressions, relational operators have lesser priorities than arithmetic operators.
+
+In the following example, first of all, two sums are calculated, and then they are compared using
+
+int number = 1000;
+boolean result = number + 10 > number + 9; // 1010 > 1009 is true
+
+In Java, you cannot write an expression like a <= b <= c. Instead of it, you should join two boolean expressions using logical operators like || and &&.
+
+Here is an example:
+
+number > 100 && number < 200; // it means 100 < number < 200
+
+Also, we can write parts of the expression in parentheses to improve readability:
+
+(number > 100) && (number < 200);
+
+Suppose there are three children in the sports class. You want to check if they are arranged in the descending order. The following program reads three integer numbers h1, h2, h3 and then checks if h1 >= h2 and h2 >= h3. Note that h means the height of a child.
+
+import java.util.Scanner;
+ 
+public class CheckAscOrder {
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+ 
+        int h1 = scanner.nextInt();
+        int h2 = scanner.nextInt();
+        int h3 = scanner.nextInt();
+ 
+        boolean descOrdered = (h1 >= h2) && (h2 >= h3);
+ 
+        System.out.println(descOrdered);
+    }
+}
+
+System.out.println((h1 >= h2) && (h2 >= h3));
+
+Suppose there are three boys in a sports class.
+
+You need to write a program that checks the boys are arranged in the ascending or descending order by height. The program must read three integer numbers h1, h2, h3 and outputs true or false. If boys have the same height, they are considered as correctly arranged.
+Sample Input 1:
+
+165 161 158
+Sample Output 1:
+
+true
+Sample Input 2:
+
+155 165 160
+Sample Output 2:
+
+false
+Sample Input 3:
+
+161 161 165
+Sample Output 3:
+
+true
+
+import java.util.Scanner;
+
+class Main {
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        // put your code here
+        int h1 = scanner.nextInt();
+        int h2 = scanner.nextInt();
+        int h3 = scanner.nextInt();
+                     
+        boolean areDescendingHeight = h1 >= h2 && h2 >= h3;
+        boolean areAscendingHeight = h1 <= h2 && h2 <= h3;
+        
+        System.out.println(areAscendingHeight || areDescendingHeight);
+        
+    }
+}
+
+
+4662 users solved this problem. Latest completion was about 1 hour ago.
+Write a program that reads three integer numbers and prints true if exactly one number is positive (i.e. > 0).
+
+Otherwise, it should print false.
+
+Sample Input 1:
+
+1 1 1
+Sample Output 1:
+
+false
+Sample Input 2:
+
+1 0 -1
+Sample Output 2:
+
+true
+
+
+import java.util.Scanner;
+
+class Main {
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        // put your code here
+        int num1 = scanner.nextInt();
+        int num2 = scanner.nextInt();
+        int num3 = scanner.nextInt();
+        
+        boolean isEaxctlyOnePositive = num1 > 0 ^ num2 > 0 ^ num3 > 0 && !(num1 > 0 && num2 > 0 && num3 > 0);
+        
+        System.out.println(isEaxctlyOnePositive); 
+    }
+}
+
+
+reference:
+Truth Table
+3-input exclusive-OR gate
+3-input Ex-OR Gate
+C	B	A	Q
+0	0	0	0
+0	0	1	1
+0	1	0	1
+0	1	1	0
+1	0	0	1
+1	0	1	0
+1	1	0	0
+1	1	1	1
+Boolean Expression Q = A ⊕ B ⊕ C
+
+if (expression) {
+    // body: do something
+}
+If the expression is true, the statements inside the code block are executed; otherwise, the program skips them.
+
+int age = ...; // it has a value
+if (age > 100) {
+    System.out.println("Very experienced person");
+}
+
+Sometimes you will see a situation when the expression in a condition is a single boolean type variable. Instead of writing b == true or b == false, use this variable (or its negation with !)as the Boolean expression:
+
+boolean b = ...; // it is true or false
+if (b) { // or !b
+    // do something
+}
+
+if (expression) {    
+    // do something
+} else {
+    // do something else
+}
+In this case, if the expression is true, then the first code block is executed; otherwise, the second code block is executed, but not both together.
+
+Note, a number is even if it can be divided exactly by 2; otherwise it's odd.
+int num = ...; // the num is initialized by some value
+ 
+if (num % 2 == 0) {
+    System.out.println("It's an even number");
+} else {    
+    System.out.println("It's an odd number");
+}
+
+if (expression0) {
+    // do something
+} else if (expression1) {
+    // do something else 1
+// ...
+} else if (expressionN) {
+    // do something else N
+}
+
+The following code outputs recommendations about what computer you need to buy depending on your budget.
+
+long dollars = ...; // your budget
+ 
+if (dollars < 1000) {
+    System.out.println("Buy a laptop");
+} else if (dollars < 2000) {
+    System.out.println("Buy a personal computer");
+} else if (dollars < 100_000) {
+    System.out.println("Buy a server");
+} else {
+    System.out.println("Buy a data center or a quantum computer");
+}
+
+Ann watched a TV program about health and learned that it is recommended to sleep at least A hours per day, but oversleeping is also not healthy, and you should not sleep more than B hours. Now Ann sleeps H hours per day. If Ann's sleep schedule complies with the requirements of that TV program – print "Normal". If Ann sleeps less than A hours, output “Deficiency”, and if she sleeps more than B hours, output “Excess”.
+
+Input to this program are the three strings with variables in the following order: AA, BB, HH. AA is always less than or equal to BB.
+
+Please note the letters' cases: the output should exactly correspond to what required in the problem, i.e. if the program must output "Excess", output such as "excess", "EXCESS", or "ExCeSs" will not be graded as correct.
+
+You should carefully think about all the conditions, which you need to use. Special attention should be paid to the strictness of the used conditional operators: distinguish between \lt< and \le≤; \gt> and \ge≥. In order to understand which ones to use, please carefully read the problem statement.
+
+Sample Input 1:
+
+6
+10
+8
+Sample Output 1:
+
+Normal
+Sample Input 2:
+
+7
+9
+10
+Sample Output 2:
+
+Excess
+Sample Input 3:
+
+7
+9
+2
+Sample Output 3:
+
+Deficiency
+
+import java.util.Scanner;
+
+class Main {
+    public static void main(String[] args) {
+        // put your code here
+        Scanner scanner = new Scanner(System.in);
+        int min = scanner.nextInt();
+        int max = scanner.nextInt();
+        int input = scanner.nextInt();
+        
+        if (input >= min && input <= max) {
+            System.out.println("Normal");
+        } else if (input < min) {
+            System.out.println("Deficiency");
+        } else {
+            System.out.println("Excess");
+        }
+    }
+}
+
+
+2900 users solved this problem. Latest completion was about 1 hour ago.
+In a computer game, each gamer has an army of units.
+
+Write a program that will classify the army of your enemies corresponding to the following rules:
+
+Units:  Category
+
+less than 1: no army
+
+from 1 to 19: pack
+
+from 20 to 249: throng
+
+from 250 to 999: zounds
+
+1000 and more: legion
+
+The program should read the number of units and output the corresponding category.
+
+Sample Input 1:
+
+5
+Sample Output 1:
+
+pack
+Sample Input 2:
+
+303
+Sample Output 2:
+
+zounds
+
+
+import java.util.Scanner;
+
+class Main {
+    public static void main(String[] args) {
+        // put your code here
+        Scanner scanner = new Scanner(System.in);
+        int armySize = scanner.nextInt();
+        if (armySize < 1) {
+            System.out.println("no army");
+        } else if (armySize >= 1 && armySize < 20) {
+            System.out.println("pack");
+        } else if (armySize >= 20 && armySize < 250) {
+            System.out.println("throng");
+        } else if (armySize >= 250 && armySize < 1000) {
+            System.out.println("zounds");
+        } else {
+            System.out.println("legion");
+        }
+    }
+}
+
+
+Imagine a chocolate bar. Remember how it is usually split into smaller bits by a special grid?
+
+Now think of chocolate as an N x M rectangle divided into little segments: N segments in length and M in width. Find out whether it is possible to break off exactly K segments from the chocolate with a single straight line: vertical or horizontal.
+
+Each segment is 1x1.
+
+Input data format
+
+The program gets an input of three integers: N, M, K.
+
+Output data format
+
+The program must output one of the two words: YES or NO.
+
+Hint
+
+Sample Input 1:
+
+4
+2
+6
+Sample Output 1:
+
+YES
+Sample Input 2:
+
+2
+10
+7
+Sample Output 2:
+
+NO
+Sample Input 3:
+
+7
+4
+21
+Sample Output 3:
+
+YES
+
+
+import java.util.Scanner;
+
+class Main {
+    public static void main(String[] args) {
+        // put your code here
+        Scanner scanner = new Scanner(System.in);
+        int len = scanner.nextInt();
+        int width = scanner.nextInt();
+        int numChunks = scanner.nextInt();
+        
+        boolean lenCheck = numChunks % len == 0;
+        boolean lenMaxCheck = (numChunks / len) < width;
+        
+        boolean widthCheck = numChunks % width == 0;
+        boolean widthMaxCheck = (numChunks / width) < len;
+        
+        if((lenCheck && lenMaxCheck) || (widthCheck && widthMaxCheck)) {
+            System.out.println("YES");
+        } else {
+            System.out.println("NO");
+        }
+        
+    }
+}
+
+If the number of iterations or the range borders are known, it is recommended to use the for-loop. If they are unknown, the while-loop may be a preferable solution.
+
+Let's write a loop for printing integer numbers from 0 to 9 in the same line.
+
+int n = 9;
+for (int i = 0; i <= n; i++) {
+    System.out.print(i + " "); // here, space is used to separate numbers
+}
+
+
+Here’s another example. Let's calculate the sum of the integer numbers from 1 to 10 (inclusive) using the for-loop.
+
+int startIncl = 1, endExcl = 11;
+ 
+int sum = 0;
+for (int i = startIncl; i < endExcl; i++) {
+    sum += i;
+}
+ 
+System.out.println(sum); // it prints "55"
+
+It is possible to declare a variable outside the loop:
+
+
+int i = 10;
+for (; i > 0; i--) {
+    System.out.print(i + " ");
+}
+Moreover, it is also possible to write an infinite loop without these parts at all:
+
+for (;;) {
+    // do something
+}
+
+
+As an example, the following code prints the multiplication table of numbers from 1 to 9 (inclusive).
+
+for (int i = 1; i < 10; i++) {
+    for (int j = 1; j < 10; j++) {
+        System.out.print(i * j + "\t");
+    }
+    System.out.println();
+}
+
+
+int i = 0; 
+for (int k = 0; k < 100; k++) { 
+			i = i++; 
+} 
+System.out.println(i);
+
+Output: 0
+
+
+
+Fizz Buzz is a classic programming problem. Here is its slightly modified version.
+
+Write a program that takes the input of two integers: the beginning and the end of the interval (both numbers belong to the interval).
+
+The program should output the numbers from this interval, but if the number is divisible by 3, you should output Fizz instead of it; if the number is divisible by 5, output Buzz; and if it is divisible both by 3 and by 5, output FizzBuzz.
+
+Output each number or the word on a separate line.
+
+Given the sequence of natural numbers. Find the sum of numbers divisible by 6. The input is the number of elements in the sequence, and then the elements themselves. In this sequence, there is always a number divisible by 6.
+
+Sample Input 1:
+
+8
+11
+12
+68
+6
+98
+81
+36
+86
+Sample Output 1:
+
+54
+
+import java.util.Scanner;
+
+class Main {
+    public static void main(String[] args) {
+        // put your code here
+        Scanner scanner = new Scanner(System.in);
+        int numOfElements = scanner.nextInt();
+        int sum = 0;
+        for (int i = 0; i < numOfElements; i++) {
+            int num = scanner.nextInt();
+            if (num % 6 == 0) {
+                sum += num;
+            }
+        }
+        System.out.println(sum);
+    }
+}
+
+Write a program that prints the product of all integer numbers from a to b (a < b).
+Include a and exclude b from the product.
+
+Sample Input 1:
+
+1 2
+Sample Output 1:
+
+1
+Sample Input 2:
+
+100 105
+Sample Output 2:
+
+11035502400
+
+import java.util.Scanner;
+
+class Main {
+    public static void main(String[] args) {
+        // put your code here
+        Scanner scanner = new Scanner(System.in);
+        int startNum = scanner.nextInt();
+        int endNum = scanner.nextInt();
+        long product = 1L;
+        for (int i = startNum; i < endNum; i++) {
+            product = product * i;
+        }
+        System.out.println(product);
+        
+    }
+}
+
+
+Hello! My name is Aid.
+I was created in 2018.
+Please, remind me your name.
+> Max
+What a great name you have, Max!
+Let me guess your age.
+Say me remainders of dividing your age by 3, 5 and 7.
+> 1 2 1
+Your age is 22: that's a good time to start programming!
+Now I will prove to you that I can count to any number you want.
+> 3
+0!
+1!
+2!
+3!
+Let's test your programming knowledge.
+Why do we use methods?
+1. To repeat a statement multiple times.
+2. To decompose a program into several small subroutines.
+3. To determine the execution time of a program.
+4. To interrupt the execution of a program.
+> 4
+Please, try again.
+> 2
+Congratulations, have a nice day!
+
+Let’s look at some number in the decimal system, for example, 4251. It is :
+
+ 4∗10^3+2∗10^2+5∗10^1+1∗10^04∗10 
+3
+ +2∗10 
+2
+ +5∗10 
+1
+ +1∗10 
+0
+
+In the binary number system, we do exactly the same, except the base is 2, not 10. Let’s look at some number in the binary system, for example, 1011.
+
+1∗2^3+0∗2^2+1∗2^1+1∗2^01∗2 
+3
+ +0∗2 
+2
+ +1∗2 
+1
+ +1∗2 
+0
+
+You will often meet the following formats:
+
+triads: 000, 001, 010, and so on;
+tetrads: 0110, 0111, and so on; 
+8-digits numbers: 00000000, 01010101, and so on.
+
+SI metric	Symbol	Powers of ten	IEC metric	Symbol	Powers of two
+Kilobyte	kB	10^3 B (1000 B)	Kibibyte	KiB	2^10 B (or 1024 B)
+Megabyte	MB	10^6 B (1000 kB)	Mebibyte	MiB	2^20 B (or 1024 KiB)
+Gigabyte	GB	10^9 B (1000 MB)	Gibibyte	GiB	2^30 B (or 1024 MiB)
+Terabyte	TB	10^12 B (1000 GB)	Tebibyte	TiB	2^40 B (or 1024 GiB)
+Petabyte	PB	10^15 B (1000 TB)	Pebibyte	PiB	2^50 B (or 1024 TiB)
+
+
+1 GiB = 1 * 1024 * 1024 = 1048576 KiB
+
+
+16384 bits = (16384 / 8) / 1024 = 2 KiB
+
+1 GB = 1 * 1000 * 1000 = 1000000 kB
+
+byte: size 8 bits (1 byte), range from -128 to 127
+short: size 16 bits (2 bytes), range from -32768 to 32767
+int: size 32 bits (4 bytes), range from −(231) to (231)−1
+long: size 64 bits (8 bytes), range from −(263) to (263)−1
+
+double (64 bits) and float (32 bits)
+
+double pi = 3.1415;
+float e = 2.71828f;
+
+Note, that when we declare and initialize a float variable, we should mark the assigned value with the special letter f. It is often a good practice to mark a long value with l as well.  
+
+char 2 bytes
+
+char lowerCaseLetter = 'a';
+char upperCaseLetter = 'Q';
+char dollar = '$';
+
+byte represents only one bit of information, but its size is not precisely defined.
+boolean enabled = true;
+boolean bugFound = false;
+
+The compiler automatically performs implicit casting when the target type is wider than the source type.
+Note, there is no boolean type on the picture above, because it is impossible to cast this type to any other and vice versa.
+
+Here are several examples of implicit castings:
+
+from int to long:
+int num = 100;
+long bigNum = num; // 100L
+from long to double:
+long bigNum = 100_000_000L;
+double bigFraction = bigNum; // 100000000.0
+ from short to int:
+short shortNum = 100;
+int num = shortNum; // 100
+ from char to int:
+char ch = '?';
+int code = ch; // 63
+
+In some cases, implicit type casting may be a bit lossy. When we convert an int to float, or a long to float or to double, we may lose some less significant bits of the value, which will result in the loss of precision.
+
+To understand that, check out the example:
+
+long bigLong =  1_200_000_002L;
+float bigFloat = bigLong; // 1.2E9 (= 1_200_000_000)
+
+char character = 'a';
+char upperCase = 'A';
+ 
+int ascii1 = character; // this is 97
+int ascii2 = upperCase; // this is 65
+
+The considered implicit casting does not work when the target type is narrower than the source type.
+
+double d = 2.00003;
+ 
+// it loses the fractional part
+long l =  (long) d; // 2
+ 
+// requires explicit casting because long is wider than int
+int i = (int) l; // 2 
+ 
+// requires explicit casting because the result is long (indicated by L)
+int val = (int) (3 + 2L); // 5
+ 
+// casting from a long literal to char
+char ch = (char) 55L; // '7'
+
+However, the explicit casting may truncate the value, because long and double can store a much larger number than int.
+
+long bigNum = 100_000_000_000_000L;
+int n = (int) bigNum; // 276447232
+
+Oops! The value has been truncated. This problem is known as type overflow. The same problem may occur when casting int to short or byte. Let's see what happens exactly. 
+
+in Java long is a 64-bit number, while int is 32-bit. When converting long to int the program just takes the last 32 bits to represent the new number. If the long contains a number less than or equal to Integer.MAX_VALUE you can convert it by casting without losing information. Otherwise, the result will be quite meaningless, although determined. That is why you shouldn't perform casting from a larger type to a smaller type unless you are absolutely sure that it is necessary, and that truncation will not interfere with your program.
+
+Explicit casting also works when implicit casting is enough.
+
+int num = 10;
+long bigNum = (long) num; // redundant casting
+But this is redundant and should not be used to avoid unnecessary constructs in your code.
+
+widening casting
+byte short int long float double
+
+The basic syntax of the while loop is the following:
+
+while (condition) {
+    // body: do something repetitive
+}
+
+loop checks condition everytime and goes inside
+
+infinite loop
+while (true) {
+    // body: do something indefinitely
+}
+
+The following loop prints integer numbers while a variable is less than 5.
+
+int i = 0;
+while (i < 5) {
+    System.out.println(i);
+    i++;
+}
+
+public class WhileDemo {
+ 
+    public static void main(String[] args) {
+        char letter = 'A';
+        while (letter <= 'Z') {
+            System.out.print(letter);
+            letter++;
+        }
+    }
+}
+
+In the do-while loop, the body is executed first and the condition is tested afterwards.
+Because do-while loops check the condition after the block is executed, the control structure is often also known as a post-test loop. 
+the do-while loop is an exit-condition loop.
+
+do {
+    // body: do something
+} while (condition);
+
+public class DoWhileDemo {
+ 
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+ 
+        int value;
+        do {
+            value = scanner.nextInt();
+            System.out.println(value);
+        } while (value != 0);
+    }
+}
+
+The while loop can be used to read a sequence of characters of an arbitrary length if it invokes hasNext() method of Scanner inside the condition. The method returns true if the next element exists and otherwise, false.
+
+Here is code that calculates the sum of all elements from the given numbers:
+
+Scanner scanner = new Scanner(System.in);
+ 
+int sum = 0;
+while (scanner.hasNext()) {
+    int elem = scanner.nextInt();
+    sum += elem;
+}
+ 
+System.out.println(sum);
+
+
+do {
+            input = scanner.nextInt();
+            cntr++;
+       } while (input != 0);
+
+
+
+
+Given a sequence of natural numbers, not exceeding 30000. Find the maximum element divisible by 4. As input, the program gets the number of elements in the sequence, and then the elements themselves. In the sequence, there is always an element divisible by 4. The number of elements does not exceed 1000. The program should print a single number: the maximum element of the sequence divisible by 4.
+
+Try to solve this problem by using a while-loop.
+
+A user inputs a long positive number M. You need to find out what is the smallest int number n such that n! > M.
+
+Just in case: wiki on factorials.
+
+Sample Input 1:
+
+6188989133
+Sample Output 1:
+
+13
+Sample Input 2:
+
+6
+Sample Output 2:
+
+4
+
+import java.util.Scanner;
+
+class Main {
+    public static void main(String[] args) {
+        // put your code here
+        Scanner scanner = new Scanner(System.in);
+        long num = scanner.nextLong();
+               
+        long fact = 1L;
+        int inNum = 1;
+        while (fact <= num) {
+            int temp = inNum;
+            long factTemp = 1L;
+            while (temp != 1) {
+                factTemp = factTemp * temp;
+                temp--;
+            } 
+            fact = factTemp;
+            if (fact > num) {
+                System.out.println(inNum);
+            }
+            inNum++;   
+        }
+        
+        
+    }
+}
+
+int i = 10;
+while (true) { // the condition to continue the loop
+    if (i == 0) { // the condition to perform break that stops this loop 
+        break;
+    }
+    i--;
+}
+
+
+The following code prints a ladder of numbers.
+
+for (int i = 0; i < 10; i++) {
+    for (int j = 0; j < 10; j++) {
+        System.out.print(j + " ");
+        if (i == j) {
+            break;
+        }
+    }
+    System.out.println();
+}
+The break statement can't stop the outer loop (with variable i) and the code prints:
+
+0 
+0 1 
+0 1 2 
+0 1 2 3 
+0 1 2 3 4 
+0 1 2 3 4 5 
+0 1 2 3 4 5 6 
+0 1 2 3 4 5 6 7 
+0 1 2 3 4 5 6 7 8 
+0 1 2 3 4 5 6 7 8 9
+
+To stop the outer loop we'd like to declare a Boolean variable stopped and use it as a special Boolean flag.
+
+boolean stopped = false;
+for (int i = 0; (i < 10) && !stopped; i++) {
+    for (int j = 0; j < 10; j++) {
+        System.out.print(j + " ");
+        if (i == j) {
+            stopped = true;
+            break;
+        }
+     }
+    System.out.println();
+}
+Now, the program's output is not the same:
+
+0
+
+Continue statement can be used inside any kind of loops.
+
+inside the for-loop, the continue causes control to immediately move to the increment/decrement statement;
+inside the while or do-while loop, control immediately moves to the condition.
+
+In the following example, a sequence of numbers is output. Odd numbers are skipped.
+
+int n = 10;
+for (int i = 0; i < n; i++) {
+    if (i % 2 != 0) {
+        continue;
+    }
+    System.out.print(i + " ");
+}
+
+Given a sequence of natural numbers. For each number of the sequence output "even" if the number is even, otherwise, "odd". If the number is equal to 0, the program must stop reading and processing numbers.
+
+Input data
+
+A sequence of natural numbers, each number in a new line.
+
+Output data
+
+The sequence of words "even" and "odd". Each word in a new line.
+
+Output the result right after the number is entered. Then input the next one. There's no need to store the sequence.
+
+Sample Input 1:
+
+1
+2
+3
+4
+0
+Sample Output 1:
+
+odd
+even
+odd
+even
+
+import java.util.Scanner;
+
+class Main {
+    public static void main(String[] args) {
+        // put your code here
+        Scanner scanner = new Scanner(System.in);
+        int input = -1;
+        do {
+            input = scanner.nextInt();
+            if (input == 0) {
+                break;
+            } else if (input % 2 == 0) {
+                System.out.println("even");
+            } else {
+                System.out.println("odd");
+            }
+        } while (input != 0);
+    }
+}
+
+here is a hint 
+1) take boolean asc & desc as true and assume previous ascending as smallest number u know and previous descending as largest number you know
+2)the loop terminates if input is equal to zero
+3)check prevasc is greater than the input ascending if it is true then the output is false if it is not true take prevAsc as input ascending
+4) similarly check prevdesc is smaller than input descending if it is true then output is false if not then take prevDesc as input descending
+5)check any one of this is true if it is then output is true else false
+hope this will help you   Never give up
+All the best
+
+import java.util.Scanner;
+
+class Main {
+    public static void main(String[] args) {
+        // put your code here
+        Scanner scanner = new Scanner(System.in);
+        boolean isBreakCalled = false;
+        int prevNum = -1;
+        int currentNum = -1;
+               
+        boolean isIncreasing = true;
+        int cntr = 0;
+               
+        while (currentNum != 0) {
+            currentNum = scanner.nextInt();
+            if (currentNum == 0) {
+                break;
+            }
+             
+            if (cntr == 2 && currentNum < prevNum) {
+                isIncreasing = false;
+            }
+             
+            if (cntr > 2 && isIncreasing &&  currentNum < prevNum) {
+                isBreakCalled = true;
+                break;
+            } else if (cntr > 2 && !isIncreasing &&  currentNum > prevNum) {
+                isBreakCalled = true;
+                break;
+            }
+            prevNum = currentNum;
+            cntr++;
+        }
+        System.out.println(!isBreakCalled);
+    }
+}
+
+In general case, a method has the following six components:
+
+a set of modifiers (public, static, etc);
+a type of the return value;
+a name;
+a list of parameters (as well known as formal parameters) in parenthesis ();
+a list of exceptions;
+a body containing statements to perform the operation.
+
+public static int sum(int a, int b) {
+    return a + b;
+}
+
+The combination of the name of a method and its parameters is called the signature. It doesn't include the returning type, modifiers, and names of parameters. 
+
+The considered method sum has the following signature sum(int, int).
+
+Here are some examples of other signatures:
+
+sum(double, double)
+min(long, long, long)
+getValue()
+
+Let's see an example. The following method performs the integer division on a given value the specified number of times.
+
+public static int divideBy2(int number, int times) {
+    if (times <= 0) {
+        return number;
+    }
+        
+    for (int i = 0; i < times; i++) {
+        number /= 2;
+    }
+        
+    return number;
+}
+
+The switch statement provides a way to choose between multiple cases based on the value of a single variable (not an expression!)
+
+The variable can be an integer number, character, string, or enumeration. 
+
+switch (action) {
+    case 1:
+        System.out.println("Starting a new game...");
+        break;
+    case 2:
+        System.out.println("Loading a saved game");
+        break;
+    case 3:
+        System.out.println("Displaying help...");
+        break;
+    case 4:
+        System.out.println("Exiting...");
+        break;
+    default:
+        System.out.println("Unsuitable action, please, try again");
+}
+
+Harry Potter needs help identifying what each house means.
+
+Read a string representing a house and output the following:
+
+if it is "gryffindor", output "bravery";
+if it is "hufflepuff", output "loyalty";
+if it is "slytherin", output "cunning";
+if it is "ravenclaw", output "intellect";
+otherwise, output "not a valid house".
+The problem was taken from the course Introduction to JavaScript and React by Ken McGrady and adapted for our educational platform.
+import java.util.*;
+
+public class Main {
+    public static void main(String[] args) {
+        // put your code here
+        Scanner scanner = new Scanner(System.in);
+        String houseName = scanner.next();
+      
+        switch (houseName) {
+            case "gryffindor":
+                System.out.println("bravery");
+                break;
+            case "hufflepuff":
+                System.out.println("loyalty");
+                break;
+            case "slytherin":
+                System.out.println("cunning");
+                break;
+            case "ravenclaw":
+                System.out.println("intellect");
+                break;
+            default:
+                System.out.println("not a valid house");                         
+                
+        }
+        
+    }
+}
+
+Residents of the country of Malevia often experiment with the plan of their rooms. Rooms can be triangular, rectangular, and round. 
+
+Write a program that calculates the floorage of the rooms.
+
+Input data format
+
+The type of the room shape and the relevant parameters.
+
+Output data format
+
+The area of the resulting room.
+
+ 
+
+Note that the value of 3.14 is used instead of the number π in Malevia.
+
+Hint
+
+Input format used by the Malevians:
+
+triangle
+a
+b
+c
+where a, b and c — lengths of the triangle sides.
+
+rectangle
+a
+b
+where a and b — lengths of the rectangle sides.
+
+circle
+r
+where r — circle radius.
+
+Note, the input values (a, b, c, r) are doubles and your answer should be, too.
+
+Sample Input 1:
+
+rectangle
+4
+10
+Sample Output 1:
+
+40.0
+Sample Input 2:
+
+circle
+5
+Sample Output 2:
+
+78.5
+Sample Input 3:
+
+triangle
+3
+4
+5
+Sample Output 3:
+
+6.0
+
+import java.util.*;
+
+class Main {
+    public static void main(String[] args) {
+        // put your code here
+        Scanner scanner = new Scanner(System.in);
+        String shape = scanner.next();
+        switch (shape) {
+            case "triangle":
+                double a = scanner.nextDouble();
+                double b = scanner.nextDouble();
+                double c = scanner.nextDouble();                
+                double p = (a + b + c) / 2;
+                double tArea = Math.sqrt(p * (p - a) * (p - b) * (p - c));
+                System.out.println(tArea);
+                break;
+            case "rectangle":
+                double len = scanner.nextDouble();
+                double width = scanner.nextDouble();
+                System.out.println(len * width);    
+                break;
+            case "circle":
+                double radius = scanner.nextDouble();
+                double area = 3.14 * radius * radius;
+                System.out.println(area);
+                break;
+            default:
+                break;    
+                    
+                
+        }
+    }
+}
+
+Sometimes the ternary operator is more readable and concise than the corresponding if statement.
+int a = ...;
+int b = ...;
+int max = ...;
+ 
+if (a > b) {
+    max = a;
+} else {
+    max = b;
+}
+The equal ternary operator looks like:
+
+int max = a > b ? a : b;
+
+int num = ...;  // it's initialized by a value
+System.out.println(num % 2 == 0 ? "even" : "odd");
+Select all correct ways to write an expression to find the max of two integer numbers a and b using ternary operator.
+
+ Select one or more options from the list
+ 
+ int max = a > b ? a : b;
+
+int max = a < b ? b : a;
+
+Programming steps
+Pick up the phone
+
+Push the button to turn on the screen
+
+Swipe the phone to unlock it
+
+Open Contacts
+
+Enter “Steve from accounting” into the search
+
+Open Steve’s contact
+
+Push the Call button
+
+JVM is a virtual simulation of a physical computer. It executes Java bytecode class files (as you remember, we usually get such files by compiling a source code file of a JVM language). JVMs are available for many hardware and software platforms, so you can run Java bytecode almost everywhere. A program compiled to Java bytecode is almost always platform-independent.
+Today there is a variety of JVM implementations. For instance, HotSpot is the primary reference Java VM implementation.
+
+JRE is an execution environment for running compiled JVM programs. JRE includes Java Virtual Machine (JVM) and Java Class Library (JCL).
+
+JCL consists of many libraries including input/output, collections, security, classes for parsing XML, user interface toolkits, and many others. Your program can use these libraries.
+
+When you run your compiled program in JRE, JVM uses bytecode class files of both your program and JCL.
+
+JDK is a package to develop programs for Java Platform. It includes JRE (so you can also run your programs) and tools for developers, such as Java compiler, debugger, archiver, etc.
+
+Java compiler (usually it's the javac﻿ tool) translates *.java into *.class. Several files with *.class extension can be packed together in a single Java Archive (JAR-file).
+
+Other JVM languages such as Kotlin or Scala have their separate compilers, they aren't bundled with JDK.
+
+JVM executes Java bytecode;
+JRE includes JVM and standard libraries: it is needed to run compiled programs;
+JDK includes JRE and development tools: it is needed to develop programs. As a developer, you need to install JDK.
+
+A mandatory part of all operating systems is the kernel. It is the core and heart of an operating system. Usually, it's one of the first programs loaded when you turn on your computer. It provides all the needed functions to run your programs.
+
+Graphical User Interface (GUI)
+ Command Line Interface (CLI).
+ There are two types of kernels, known as monolithic kernel and microkernel. The monolithic kernel is a large program that performs most of the OS functions. 
+ At the same time, the microkernel provides only a small subset of the operating system functions, but we can extend it with additional modules known as drivers
+ Command-line interface or CLI is computer software where you can interact with an OS via text commands. On the other hand, the Graphical user interface or GUI provides an interface with many icons and menus. Here, you give commands to the operating system by clicking on these icons or menu items. 
+ 
+ For Windows 10 or 8 at Start->Windows System->Command Prompt.
+
+For Windows 7, Vista or XP at Start->All Programs->Accessories->Command Prompt.
+
+For Mac OS at Applications->Utilities->Terminal. Some Mac users prefer iTerm2, a replacement for Terminal, because it is slightly more user-friendly. You can find the details on iTerm official website and install it on your computer.
+
+For Linux: it depends on your system, but usually, CLI is located at Applications->Accessories->Terminal or at Applications->System->Terminal. If you don’t find it here, just google how to access the command line in your system.
+
+https://ss64.com/
+
+ If you use Windows and are already sick and tired of exploring the current drive, you can change it by adding the /d option to the cd. Don't forget to set the path you want to follow as the parameter, for example, F:\Codepen snippets:
+
+C:\users\student\Desktop cd /d F:\Codepen snippets
+F:\Codepen snippets>
+
+Since Java 11 it is possible to compile and run Java source code file using a single command java Main.java. It will compile the file in-memory, so it does not produce a .class file. Many developers don't know this small but interesting feature.
+
+
+
+
+
+
+
+
+
